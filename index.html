@@ -369,9 +369,9 @@ header.bar{
 @media (prefers-reduced-motion: reduce){ .buoy{ animation:none; } }
 
 .cast-poems{ max-width:660px; }
-.cast-poem{ margin-bottom:46px; padding-left:20px; border-left:3px solid var(--cyan); }
+.cast-poem{ margin-bottom:30px; padding:22px 26px; background:var(--card); border:2.5px solid var(--encre); border-left:6px solid var(--cyan); box-shadow:6px 6px 0 var(--cyan); border-radius:3px; }
 .cast-poem.flash{ animation:castflash 1.3s ease; }
-@keyframes castflash{ 0%{ background:rgba(8,176,194,.20) } 100%{ background:transparent } }
+@keyframes castflash{ 0%{ background:rgba(8,176,194,.30) } 100%{ background:var(--card) } }
 .cast-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
 .cast-n{ font-family:var(--mono); font-weight:700; font-size:.8rem; color:var(--cyan-d); }
 .cast-title{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.4rem; letter-spacing:-.5px; color:var(--encre); }
@@ -391,10 +391,10 @@ header.bar{
 .step-t{ font-family:var(--display); font-weight:700; text-transform:lowercase; font-size:1.05rem; letter-spacing:-.3px; color:var(--encre); }
 .step-arrow{ margin-left:auto; font-family:var(--mono); font-size:.8rem; color:var(--encre-pale); }
 .stairs-view .cast-label{ color:var(--tang-d); }
-.stairs-view .cast-poem{ border-left-color:var(--tang); }
+.stairs-view .cast-poem{ border-left-color:var(--tang); box-shadow:6px 6px 0 var(--tang); }
 .stairs-view .cast-n{ color:var(--tang-d); }
 .stairs-view .cast-poem.flash{ animation:stepflash 1.3s ease; }
-@keyframes stepflash{ 0%{ background:rgba(255,106,23,.18) } 100%{ background:transparent } }
+@keyframes stepflash{ 0%{ background:rgba(255,106,23,.26) } 100%{ background:var(--card) } }
 @media(max-width:600px){ .step{ margin-left:0; } }
 
 /* PEARLS — a living collection forming in real time, one poem a month (feelings dressed in oyster pearls) */
@@ -419,9 +419,26 @@ header.bar{
 .pearl-month{ font-family:var(--mono); font-size:.6rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--encre-pale); }
 .pearl-title{ font-family:var(--mono); font-size:.74rem; color:var(--encre); line-height:1.12; }
 .pearl-item.forming .pearl-title{ color:var(--encre-pale); font-style:italic; }
-.oyster-hint{ text-align:center; font-family:var(--mono); font-size:.72rem; color:var(--encre-pale); margin:14px 0 42px; }
-.oyster-poems{ max-width:660px; margin:0 auto; }
-.oyster-poem .pearl-omonth{ font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--cyan-d); }
+.pearl-item.active .pearl-title{ color:var(--cyan-d); font-weight:700; }
+.pearl-item.active .pearl-bead{ box-shadow: inset 0 -3px 6px rgba(150,130,150,.35), inset 0 3px 5px rgba(255,255,255,.9), 0 0 0 3px var(--cyan), 0 5px 12px rgba(0,0,0,.18); }
+.oyster-hint{ text-align:center; font-family:var(--mono); font-size:.72rem; color:var(--encre-pale); margin:14px 0 28px; }
+/* the poem opens inside a nacre card — "within its pearl" */
+.oyster-reader{ max-width:600px; margin:0 auto; }
+.oyster-panel{ display:none; }
+.oyster-panel.open{ display:block; position:relative;
+  background:radial-gradient(160px 120px at 15% 0%, rgba(255,255,255,.92), rgba(255,255,255,0) 72%), var(--card);
+  border:2.5px solid var(--encre); border-radius:16px;
+  box-shadow:7px 7px 0 rgba(150,130,150,.38);
+  padding:30px 30px 32px; animation:pearlopen .42s ease; }
+@keyframes pearlopen{ from{ opacity:0; transform:translateY(10px) scale(.99); } to{ opacity:1; transform:none; } }
+@media(prefers-reduced-motion: reduce){ .oyster-panel.open{ animation:none; } }
+.oyster-panel.open::before{ content:""; position:absolute; top:-15px; left:28px; width:28px; height:28px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff, #f4ebf1 42%, #dde7ef 68%, #c6b3c2 100%);
+  box-shadow: inset 0 -2px 5px rgba(150,130,150,.4), inset 0 2px 4px rgba(255,255,255,.9), 0 3px 7px rgba(0,0,0,.2); }
+.oyster-phead{ display:flex; align-items:baseline; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.oyster-pnum{ font-family:var(--mono); font-weight:700; font-size:.8rem; color:var(--cyan-d); }
+.oyster-panel .pearl-omonth{ font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--cyan-d); }
+.oyster-ptitle{ font-family:var(--display); font-weight:700; font-size:1.5rem; letter-spacing:-.5px; color:var(--encre); }
 .oyster-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.5; white-space:pre-wrap; color:var(--encre-doux); }
 /* pearl-string preview on the featured card */
 .pearl-cover{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding:30px 22px; min-height:150px; background:var(--card); }
@@ -1801,25 +1818,27 @@ function renderProject(s, p){
     const done = p.pieces.length;
     const nextMonth = MONTHS.slice(0,total).find(m => !byMonth[m]);
     const last = p.pieces[p.pieces.length-1];
+    const activeN = last ? last.n : null;
     const beads = MONTHS.slice(0,total).map(m => {
       const pc = byMonth[m], mo = m.slice(0,3);
       if(pc){
         const fresh = (last && pc.month === last.month) ? ' fresh' : '';
-        return `<button class="pearl-item formed${fresh}" data-target="oyster-${pc.n}" onclick="castJump(this)" aria-label="${esc(m)}: ${esc(pc.title)}">
+        const act = (pc.n === activeN) ? ' active' : '';
+        return `<button class="pearl-item formed${fresh}${act}" data-target="oyster-${pc.n}" onclick="oysterOpen(this)" aria-label="${esc(m)}: ${esc(pc.title)}">
           <span class="pearl-bead"></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title lc">${esc(pc.title)}</span>
         </button>`;
       }
       return `<span class="pearl-item forming" aria-label="${esc(m)}: forming"><span class="pearl-bead"></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title">forming</span></span>`;
     }).join('');
     const pct = Math.round(done/total*100);
-    const poems = p.pieces.map(pc => `
-      <article class="cast-poem oyster-poem" id="oyster-${pc.n}">
-        <div class="cast-head">
-          <span class="cast-n">${String(pc.n).padStart(2,'0')}</span>
+    const panels = p.pieces.map(pc => `
+      <article class="oyster-panel${pc.n === activeN ? ' open' : ''}" id="oyster-${pc.n}">
+        <div class="oyster-phead">
+          <span class="oyster-pnum">${String(pc.n).padStart(2,'0')}</span>
           <span class="pearl-omonth lc">${esc(pc.month)}</span>
-          <h4 class="cast-title lc">${esc(pc.title)}</h4>
+          <h4 class="oyster-ptitle lc">${esc(pc.title)}</h4>
         </div>
-        <div class="oyster-verse">${esc(pc.poem)}</div>
+        <div class="oyster-verse">${esc(pc.poem.replace(/\n{3,}/g, '\n\n'))}</div>
       </article>`).join('');
     body = `
       <div class="oyster-status">
@@ -1828,8 +1847,8 @@ function renderProject(s, p){
         <div class="oyster-bar"><i style="width:${pct}%"></i></div>
       </div>
       <div class="pearl-string">${beads}</div>
-      <p class="oyster-hint">tap a formed pearl to read its month &middot; the pale ones are still forming</p>
-      <div class="cast-poems oyster-poems">${poems}</div>`;
+      <p class="oyster-hint">tap a pearl to open its poem &middot; the pale ones are still forming</p>
+      <div class="oyster-reader">${panels}</div>`;
   } else if(p.type === 'fragments'){
     const pad = n => String(n).padStart(3,'0');
     const cards = p.photos.map((ph,i) => `
@@ -1981,6 +2000,12 @@ window.zoom = function(src){
 // Cast (buoys): tap a floating character to jump to its poem and flash it.
 window.castJump = function(el){ var t = document.getElementById(el.dataset.target); if(!t) return;
   t.scrollIntoView({behavior:'smooth', block:'center'}); t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); };
+// Pearls: a poem opens inside its pearl — only one at a time.
+window.oysterOpen = function(el){ var id = el.dataset.target;
+  document.querySelectorAll('.oyster-panel').forEach(function(p){ p.classList.toggle('open', p.id === id); });
+  document.querySelectorAll('.pearl-item').forEach(function(b){ b.classList.toggle('active', b === el); });
+  var panel = document.getElementById(id);
+  if(panel) panel.scrollIntoView({behavior:'smooth', block:'nearest'}); };
 // Zine (fanzine): leaf through spreads one at a time.
 window.zineShow = function(z, idx){ z.dataset.idx = idx;
   z.querySelectorAll('.spread').forEach(function(s,i){ s.classList.toggle('active', i===idx); });
