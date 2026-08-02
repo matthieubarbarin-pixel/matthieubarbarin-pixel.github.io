@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layers with no dead ends</title>
+
+<!-- ============================================================= -->
+<!--  FONTS (from Google Fonts, needs internet)                    -->
+<!-- ============================================================= -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* =================================================================
+   PALETTE — cyan + tangerine on warm paper, industrial & a bit unruly
+   Change these colors to reshape the whole mood.
+   ================================================================= */
+:root{
+  --paper:  #f4efe2;   /* warm off-white paper */
+  --paper2: #ece5d3;
+  --card:   #fffdf6;   /* card surface */
+
+  --encre:  #191714;   /* near-black ink */
+  --encre-doux:#4c473d;
+  --encre-pale:#8a8474;
+
+  --cyan:   #08b0c2;   /* cyan */
+  --cyan-d: #067a87;
+  --tang:   #ff6a17;   /* tangerine */
+  --tang-d: #d1500a;
+
+  /* accents per section */
+  --a-sounds:var(--tang);
+  --a-words: var(--cyan);
+  --a-images:var(--tang);
+
+  --display:'Space Grotesk', system-ui, sans-serif;
+  --mono:   'Space Mono', ui-monospace, monospace;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--display);
+  color:var(--encre);
+  line-height:1.6;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; border:none; background:none; }
+
+/* Background: warm paper + a faint engineering grid (industrial) */
+.sky{
+  position:fixed; inset:0; z-index:-2;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(rgba(25,23,20,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(25,23,20,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+}
+/* a couple of loose color blooms so it isn't sterile */
+.sky::after{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(600px 500px at 88% -6%, rgba(255,106,23,.14), transparent 60%),
+    radial-gradient(560px 480px at 6% 104%, rgba(8,176,194,.14), transparent 60%);
+}
+
+.wrap{ max-width:1080px; margin:0 auto; padding:0 26px; }
+
+/* =================================================================
+   TOP BAR — present everywhere, so there is never a dead end
+   ================================================================= */
+header.bar{
+  position:sticky; top:0; z-index:50;
+  background:var(--paper);
+  border-bottom:2px solid var(--encre);
+}
+.bar .wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 26px;
+}
+.brand{
+  font-family:var(--mono); font-weight:700; text-transform:uppercase;
+  font-size:.9rem; letter-spacing:.5px; color:var(--encre);
+}
+.bar nav a{
+  font-family:var(--mono); font-size:.78rem; text-transform:uppercase;
+  letter-spacing:1px; color:var(--encre-doux); margin-left:20px;
+  padding:3px 2px; border-bottom:2px solid transparent; transition:.15s;
+}
+.bar nav a:hover{ color:var(--encre); border-color:var(--tang); }
+@media(max-width:600px){ .bar nav{ display:none; } }
+
+/* =================================================================
+   VIEWS
+   ================================================================= */
+.view{ display:none; animation:fade .35s ease; }
+.view.active{ display:block; }
+@keyframes fade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+/* ---- Per-project photo background (duplicated down the page) ---- */
+.view.has-bg{ position:relative; }
+.view.has-bg .page-bg{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background-repeat:repeat-y; background-position:top center; background-size:100% auto;
+  filter:saturate(.9) brightness(1.02);
+}
+.view.has-bg .page-bg-veil{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg,
+     rgba(244,239,226,.80) 0%, rgba(244,239,226,.58) 12%,
+     rgba(244,239,226,.52) 50%, rgba(244,239,226,.58) 88%,
+     rgba(244,239,226,.80) 100%);
+}
+.view.has-bg > .wrap{ position:relative; z-index:2; }
+.view.has-bg .head h1,
+.view.has-bg .head .kind,
+.view.has-bg .head p,
+.view.has-bg .crumbs{ text-shadow:0 1px 10px rgba(244,239,226,.9); }
+
+/* ---- HOME (the hub — just the options, nothing scrolling) -------- */
+#home{ min-height:calc(100vh - 52px); display:flex; align-items:center; }
+.hub{ width:100%; padding:56px 0; }
+.hub .eyebrow{
+  font-family:var(--mono); font-size:.75rem; letter-spacing:3px;
+  text-transform:uppercase; color:var(--cyan-d); margin-bottom:18px;
+  display:inline-block; border:2px solid var(--encre); padding:5px 12px;
+  transform:rotate(-1.5deg); background:var(--card);
+}
+.hub h1{
+  font-family:var(--display); font-weight:700; text-transform:uppercase;
+  font-size:clamp(2.6rem,8vw,5.6rem); line-height:.92; letter-spacing:-1px;
+  color:var(--encre); margin-bottom:20px; max-width:12ch;
+}
+.hub h1 .c1{ color:var(--tang); }
+.hub h1 .c2{ color:var(--cyan); font-style:italic; }
+.hub .lede{
+  font-family:var(--mono); font-size:.9rem; color:var(--encre-doux);
+  max-width:440px; margin-bottom:48px; line-height:1.7;
+}
+.options{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:24px;
+  max-width:900px;
+}
+.option{
+  position:relative; text-align:left; background:var(--card);
+  border:2.5px solid var(--encre); border-radius:3px;
+  padding:22px 22px 20px; min-height:220px;
+  display:flex; flex-direction:column;
+  box-shadow:7px 7px 0 var(--tint);
+  transition:transform .18s, box-shadow .18s;
+}
+.option:nth-child(1){ transform:rotate(-1.4deg); }
+.option:nth-child(2){ transform:rotate(.8deg); }
+.option:nth-child(3){ transform:rotate(-.6deg); }
+.option:hover{ transform:rotate(0) translate(3px,3px); box-shadow:2px 2px 0 var(--tint); }
+.option .layer-no{
+  font-family:var(--mono); font-weight:700; font-size:2.4rem;
+  color:var(--tint); line-height:1; -webkit-text-stroke:1px var(--encre);
+}
+.option h2{
+  font-family:var(--display); font-weight:700; text-transform:uppercase;
+  font-size:2rem; letter-spacing:-.5px; color:var(--encre);
+  margin-top:auto; margin-bottom:4px;
+}
+.option p{ font-family:var(--mono); font-size:.78rem; color:var(--encre-doux); }
+.option .arrow{
+  margin-top:14px; font-family:var(--mono); font-weight:700; font-size:.78rem;
+  text-transform:uppercase; letter-spacing:1px; color:var(--tint-ink);
+  display:inline-flex; align-items:center; gap:6px;
+}
+.option:hover .arrow{ gap:12px; }
+
+/* ---- SECTION & PROJECT shared -------- */
+.crumbs{
+  padding:30px 0 0; font-family:var(--mono); font-size:.76rem;
+  text-transform:uppercase; letter-spacing:.5px; color:var(--encre-pale);
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+}
+.crumbs a{ color:var(--encre-doux); border-bottom:2px solid transparent; }
+.crumbs a:hover{ color:var(--encre); border-color:var(--tang); }
+.crumbs .sep{ color:var(--tang); font-weight:700; }
+
+.head{ padding:22px 0 40px; }
+.head .kind{
+  font-family:var(--mono); font-size:.75rem; letter-spacing:2px;
+  text-transform:uppercase; margin-bottom:12px;
+  display:inline-block; border:2px solid currentColor; padding:3px 9px;
+  transform:rotate(-1deg);
+}
+.head h1{
+  font-family:var(--display); font-weight:700; text-transform:uppercase;
+  font-size:clamp(2rem,5vw,3.4rem); letter-spacing:-1px; color:var(--encre);
+}
+.head p{ font-family:var(--mono); color:var(--encre-doux); margin-top:12px; max-width:560px; font-size:.9rem; line-height:1.7; }
+.head .byline{ margin-top:6px; font-size:.78rem; letter-spacing:1px; text-transform:uppercase; color:var(--tang-d); }
+
+.section-content{ padding-bottom:90px; }
+
+/* Grid of project cards — deliberately a little uneven */
+.projects{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:28px 26px; }
+.pcard{
+  text-align:left; position:relative;
+  border-radius:3px; padding:22px;
+  background:var(--card); border:2.5px solid var(--encre);
+  box-shadow:5px 5px 0 var(--encre);
+  transition:transform .18s, box-shadow .18s;
+}
+.pcard:hover{ transform:translate(3px,3px); box-shadow:1px 1px 0 var(--encre); }
+.pcard .tag{
+  font-family:var(--mono); font-weight:700; font-size:.68rem; letter-spacing:1px;
+  text-transform:uppercase; margin-bottom:12px; display:inline-block;
+  background:var(--encre); color:var(--paper); padding:3px 8px;
+}
+.pcard h3{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.4rem; letter-spacing:-.5px; color:var(--encre); margin-bottom:6px; line-height:1.05; }
+/* force lowercase styling for a specific title / collection */
+.lc{ text-transform:lowercase !important; }
+.pcard p{ font-family:var(--mono); font-size:.8rem; color:var(--encre-doux); }
+.pcard .count{ margin-top:16px; font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--encre-pale); }
+
+/* Featured collections — bigger cards with a cover banner */
+.feat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:30px; margin-bottom:46px; }
+.fcard{ position:relative; display:flex; flex-direction:column; background:var(--card);
+  border:2.5px solid var(--encre); border-radius:3px; box-shadow:8px 8px 0 var(--encre);
+  transition:transform .18s, box-shadow .18s; overflow:hidden; }
+.fcard:hover{ transform:translate(3px,3px); box-shadow:3px 3px 0 var(--encre); }
+.fcover{ height:230px; border-bottom:2.5px solid var(--encre); overflow:hidden; background:var(--encre); }
+.fcover img{ width:100%; height:100%; object-fit:cover; display:block; }
+.fbody{ padding:24px; }
+.fcard .tag{ font-family:var(--mono); font-weight:700; font-size:.68rem; letter-spacing:1px; text-transform:uppercase;
+  margin-bottom:12px; display:inline-block; background:var(--encre); color:var(--paper); padding:3px 8px; }
+.fcard h3{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.75rem; letter-spacing:-.5px; color:var(--encre); margin-bottom:6px; line-height:1.02; }
+.fcard p{ font-family:var(--mono); font-size:.85rem; color:var(--encre-doux); }
+.fcard .count{ margin-top:16px; font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--encre-pale); }
+.more-label{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:2px; color:var(--encre-pale); margin:0 0 22px; padding-bottom:9px; border-bottom:2px solid var(--encre); }
+[data-theme="images"] .fcard{ box-shadow:8px 8px 0 var(--tang); }
+[data-theme="images"] .fcard:hover{ box-shadow:3px 3px 0 var(--tang); }
+[data-theme="images"] .fcover img{ filter:saturate(.85) contrast(.95) brightness(1.04) sepia(.08); }
+[data-theme="words"] .fcard{ box-shadow:8px 8px 0 var(--cyan); }
+[data-theme="words"] .fcard:hover{ box-shadow:3px 3px 0 var(--cyan); }
+[data-theme="words"] .fcard:nth-child(even){ box-shadow:8px 8px 0 var(--tang); }
+[data-theme="words"] .fcard:nth-child(even):hover{ box-shadow:3px 3px 0 var(--tang); }
+@media(max-width:600px){ .fcover{ height:180px; } }
+
+/* ================= SECTION THEMES (each layer looks different) ==== */
+/* Sounds → tangerine, chunky, slightly rounded, warm shadow */
+[data-theme="sounds"] .pcard{ border-radius:16px; box-shadow:6px 6px 0 var(--tang); }
+[data-theme="sounds"] .pcard:nth-child(even){ transform:rotate(-1deg); }
+[data-theme="sounds"] .pcard:nth-child(even):hover{ transform:rotate(0) translate(3px,3px); }
+[data-theme="sounds"] .pcard:hover{ box-shadow:2px 2px 0 var(--tang); }
+[data-theme="sounds"] .kind,[data-theme="sounds"] .crumbs .here{ color:var(--tang-d); }
+
+/* Words → cyan, sharp sheet with a fat margin rule (a page) */
+[data-theme="words"] .pcard{ box-shadow:6px 6px 0 var(--cyan); padding-left:32px; }
+[data-theme="words"] .pcard::before{
+  content:""; position:absolute; left:14px; top:14px; bottom:14px; width:3px; background:var(--cyan);
+}
+[data-theme="words"] .pcard:hover{ box-shadow:2px 2px 0 var(--cyan); }
+[data-theme="words"] .kind,[data-theme="words"] .crumbs .here{ color:var(--cyan-d); }
+
+/* Images → polaroids, alternating cyan / tangerine, thrown on a table */
+[data-theme="images"] .projects{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+[data-theme="images"] .pcard{ padding:12px 12px 18px; }
+[data-theme="images"] .pcard:nth-child(3n+1){ transform:rotate(-2.2deg); box-shadow:6px 6px 0 var(--cyan); }
+[data-theme="images"] .pcard:nth-child(3n+2){ transform:rotate(1.6deg); box-shadow:6px 6px 0 var(--tang); }
+[data-theme="images"] .pcard:nth-child(3n+3){ transform:rotate(-.8deg); box-shadow:6px 6px 0 var(--encre); }
+[data-theme="images"] .pcard:hover{ transform:rotate(0) translate(3px,3px); }
+[data-theme="images"] .pcard .cover{
+  aspect-ratio:4/3; margin-bottom:12px; border:2px solid var(--encre); overflow:hidden;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,106,23,.5) 0 12px, rgba(8,176,194,.5) 12px 24px);
+}
+[data-theme="images"] .pcard .cover img{ width:100%; height:100%; object-fit:cover; display:block;
+  filter:saturate(.8) contrast(.92) brightness(1.05) sepia(.12); }
+[data-theme="images"] .pcard h3{ padding:0 4px; }
+[data-theme="images"] .pcard p,[data-theme="images"] .pcard .count{ padding:0 4px; }
+[data-theme="images"] .kind,[data-theme="images"] .crumbs .here{ color:var(--tang-d); }
+
+/* ================= PROJECT (deepest layer) ==================== */
+/* Spotify embeds */
+.embeds{ display:grid; gap:24px; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
+.embed-box{
+  background:var(--card); border-radius:3px; padding:16px;
+  border:2.5px solid var(--encre); box-shadow:5px 5px 0 var(--tang);
+}
+.embed-box h4{ font-family:var(--mono); font-weight:700; text-transform:uppercase; font-size:.82rem; letter-spacing:.5px; margin-bottom:12px; color:var(--encre); }
+.embed-slot{
+  border-radius:2px; min-height:152px; display:flex; align-items:center;
+  justify-content:center; text-align:center; padding:20px;
+  background:var(--paper2); border:2px dashed var(--encre);
+  color:var(--encre-pale); font-family:var(--mono); font-size:.76rem;
+}
+.embed-slot.filled{ min-height:0; padding:0; background:none; border:none; }
+.embed-slot iframe{ width:100%; border:0; border-radius:12px; display:block; }
+
+/* Poems — typewritten on cyan-tabbed sheets */
+.poems{ max-width:640px; }
+.poem{
+  background:var(--card); border-radius:2px; padding:28px 32px;
+  border:2.5px solid var(--encre); box-shadow:6px 6px 0 var(--cyan);
+  margin-bottom:28px;
+}
+.poem:nth-child(even){ box-shadow:6px 6px 0 var(--tang); }
+.poem h4{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.3rem; letter-spacing:-.5px; color:var(--encre); margin-bottom:16px; }
+.poem .verse{
+  font-family:var(--mono); font-weight:400; font-size:.95rem; line-height:1.95;
+  white-space:pre-line; color:var(--encre-doux);
+}
+
+/* Duet — flip tiles: poem <-> photo (click to turn) */
+.duet-head{ display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start; margin-bottom:30px; }
+.duet-cover{ width:320px; max-width:100%; margin:0; border:2.5px solid var(--encre); box-shadow:7px 7px 0 var(--cyan); border-radius:2px; }
+.duet-playlist{ flex:1; min-width:280px; max-width:440px; }
+.duet-playlist iframe{ display:block; border-radius:12px; }
+.duet-hint{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--encre-pale); margin-bottom:26px; display:inline-flex; align-items:center; gap:8px; border:2px dashed var(--encre); padding:6px 12px; }
+.duet-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:28px; align-items:start; }
+.flip{ perspective:1200px; cursor:pointer; }
+.flip-inner{ position:relative; transition:transform .6s cubic-bezier(.2,.7,.2,1); transform-style:preserve-3d; }
+.flip.flipped .flip-inner{ transform:rotateY(180deg); }
+.flip-face{ position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; border:2.5px solid var(--encre); border-radius:2px; overflow:hidden; }
+.flip-front{ position:relative; min-height:340px; background:var(--card); box-shadow:5px 5px 0 var(--cyan); padding:20px 18px 16px; display:flex; flex-direction:column; }
+.flip:nth-child(even) .flip-front{ box-shadow:5px 5px 0 var(--tang); }
+.flip-back{ transform:rotateY(180deg); background:var(--encre); box-shadow:5px 5px 0 var(--tang); }
+.flip:nth-child(even) .flip-back{ box-shadow:5px 5px 0 var(--cyan); }
+.flip .corner{ position:absolute; top:9px; right:11px; font-family:var(--mono); font-size:.58rem; letter-spacing:1px; text-transform:uppercase; color:var(--encre-pale); z-index:2; }
+.flip-back .corner{ color:rgba(255,255,255,.85); }
+.flip-num{ font-family:var(--mono); font-weight:700; font-size:.7rem; letter-spacing:1px; color:var(--cyan-d); }
+.flip:nth-child(even) .flip-num{ color:var(--tang-d); }
+.flip-title{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.2rem; letter-spacing:-.3px; line-height:1; color:var(--encre); margin:3px 0 12px; }
+.flip-poem{ font-family:var(--mono); font-size:.8rem; line-height:1.85; white-space:pre-line; color:var(--encre-doux); flex:1; }
+.flip-poem::-webkit-scrollbar{ width:4px; } .flip-poem::-webkit-scrollbar-thumb{ background:var(--encre-pale); }
+.flip-date{ font-family:var(--mono); font-size:.6rem; color:var(--encre-pale); margin-top:8px; }
+.flip-back img{ width:100%; height:100%; object-fit:contain; display:block; }
+.flip-cap{ position:absolute; left:0; right:0; bottom:0; padding:14px 12px 10px; font-family:var(--mono); font-size:.68rem; color:#fff; text-transform:uppercase; letter-spacing:.5px; background:linear-gradient(transparent, rgba(0,0,0,.75)); }
+.flip-missing{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:16px; color:var(--paper); font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1px;
+  background:repeating-linear-gradient(45deg, rgba(255,106,23,.5) 0 14px, rgba(8,176,194,.5) 14px 28px); }
+
+/* Cast — a floating "crew" of one element per poem (collection: buoys) */
+.cast-sea{ position:relative; margin:0 0 46px; padding:28px 22px 40px; border:2.5px solid var(--encre); border-radius:3px; overflow:hidden;
+  background:linear-gradient(180deg, rgba(8,176,194,.16), rgba(8,176,194,.04)); box-shadow:6px 6px 0 var(--cyan); }
+.cast-sea::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:14px;
+  background:repeating-linear-gradient(90deg, transparent 0 9px, rgba(8,176,194,.35) 9px 18px); }
+.cast-label{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--cyan-d); margin-bottom:22px; }
+.cast{ display:flex; flex-wrap:wrap; gap:20px 22px; align-items:center; }
+.buoy{ position:relative; width:58px; height:58px; border-radius:50%;
+  background:var(--card); border:2.5px solid var(--encre);
+  box-shadow:4px 4px 0 var(--cyan); cursor:pointer; animation:bob 3.2s ease-in-out infinite;
+  transition:box-shadow .15s, transform .15s; display:flex; align-items:center; justify-content:center; }
+.buoy:nth-child(3n){ box-shadow:4px 4px 0 var(--tang); animation-duration:3.9s; }
+.buoy:nth-child(3n+1){ animation-duration:2.7s; }
+.buoy:hover{ animation-play-state:paused; transform:translateY(-4px); box-shadow:6px 7px 0 var(--cyan); }
+.buoy-icon{ font-size:1.5rem; line-height:1; }
+.buoy-n{ position:absolute; right:-6px; top:-6px; width:20px; height:20px; border-radius:50%;
+  background:var(--encre); color:var(--paper); font-family:var(--mono); font-weight:700; font-size:.56rem;
+  display:flex; align-items:center; justify-content:center; }
+@keyframes bob{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-7px) } }
+@media (prefers-reduced-motion: reduce){ .buoy{ animation:none; } }
+
+.cast-poems{ max-width:660px; }
+.cast-poem{ margin-bottom:46px; padding-left:20px; border-left:3px solid var(--cyan); }
+.cast-poem.flash{ animation:castflash 1.3s ease; }
+@keyframes castflash{ 0%{ background:rgba(8,176,194,.20) } 100%{ background:transparent } }
+.cast-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+.cast-n{ font-family:var(--mono); font-weight:700; font-size:.8rem; color:var(--cyan-d); }
+.cast-title{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.4rem; letter-spacing:-.5px; color:var(--encre); }
+.cast-icon{ font-size:1.15rem; line-height:1; cursor:default; }
+.cast-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.9; white-space:pre-line; color:var(--encre-doux); }
+
+/* Stairs — a staircase of steps linking to each poem (collection: watching steps) */
+.stairs{ margin:0 0 48px; }
+.step{ display:flex; align-items:center; gap:14px; width:min(360px,100%);
+  margin-left:calc(var(--i) * 42px);
+  padding:13px 18px; background:var(--card);
+  border:2.5px solid var(--encre); border-left:6px solid var(--tang); border-bottom-width:5px;
+  cursor:pointer; transition:background .14s, transform .12s; text-align:left; }
+.step + .step{ margin-top:-3px; }
+.step:hover{ background:var(--paper2); transform:translateX(3px); }
+.step-n{ font-family:var(--mono); font-weight:700; font-size:.8rem; color:var(--tang-d); }
+.step-t{ font-family:var(--display); font-weight:700; text-transform:lowercase; font-size:1.05rem; letter-spacing:-.3px; color:var(--encre); }
+.step-arrow{ margin-left:auto; font-family:var(--mono); font-size:.8rem; color:var(--encre-pale); }
+.stairs-view .cast-label{ color:var(--tang-d); }
+.stairs-view .cast-poem{ border-left-color:var(--tang); }
+.stairs-view .cast-n{ color:var(--tang-d); }
+.stairs-view .cast-poem.flash{ animation:stepflash 1.3s ease; }
+@keyframes stepflash{ 0%{ background:rgba(255,106,23,.18) } 100%{ background:transparent } }
+@media(max-width:600px){ .step{ margin-left:0; } }
+
+/* Zine — a fanzine you leaf through, one spread at a time (collection: you're so cool, you crush me) */
+.zine-head{ display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start; margin-bottom:26px; }
+.zine-cover{ width:280px; max-width:100%; margin:0; border:2.5px solid var(--encre); box-shadow:7px 7px 0 var(--tang); border-radius:2px; }
+.zine-playlist{ flex:1; min-width:280px; max-width:440px; }
+.zine-playlist iframe{ display:block; border-radius:12px; }
+.zine{ margin-bottom:10px; }
+.zspreads{ position:relative; }
+.spread{ display:none; }
+.spread.active{ display:grid; grid-template-columns:1fr 1fr; border:2.5px solid var(--encre); box-shadow:8px 8px 0 var(--tang); background:var(--card); animation:crushin .42s cubic-bezier(.2,.8,.2,1); transform-origin:center; }
+@keyframes crushin{ 0%{ transform:scaleY(.66) skewX(-2deg); opacity:.35 } 60%{ transform:scaleY(1.03); opacity:1 } 100%{ transform:none } }
+.zpage{ min-height:460px; }
+.zpage-text{ padding:26px 26px 30px; border-right:2px solid var(--encre); display:flex; flex-direction:column; }
+.znum{ font-family:var(--mono); font-weight:700; font-size:.72rem; letter-spacing:1px; color:var(--tang-d); }
+.ztitle{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.5rem; letter-spacing:-.5px; color:var(--encre); margin:5px 0 16px; line-height:1; }
+.zverse{ font-family:var(--mono); font-size:.82rem; line-height:1.85; white-space:pre-wrap; color:var(--encre-doux); flex:1; }
+.zpage-photo{ position:relative; background:var(--encre); overflow:hidden; min-height:460px; }
+.zpage-photo img{ width:100%; height:100%; object-fit:cover; }
+.zcap{ position:absolute; left:0; right:0; bottom:0; padding:22px 14px 12px; font-family:var(--mono); font-size:.74rem; line-height:1.55; color:#fff; white-space:pre-line; background:linear-gradient(transparent, rgba(0,0,0,.8)); }
+.zctrl{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:18px; }
+.zbtn{ font-family:var(--mono); font-weight:700; text-transform:uppercase; font-size:.78rem; letter-spacing:.5px;
+  border:2.5px solid var(--encre); background:var(--card); padding:9px 15px; box-shadow:3px 3px 0 var(--cyan); cursor:pointer; transition:transform .12s, box-shadow .12s; }
+.zbtn:hover{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--cyan); }
+.zdots{ display:flex; gap:9px; }
+.zdot{ width:13px; height:13px; border-radius:50%; border:2px solid var(--encre); background:transparent; cursor:pointer; padding:0; transition:background .15s; }
+.zdot.on{ background:var(--tang); }
+@media(max-width:640px){ .spread.active{ grid-template-columns:1fr; } .zpage-text{ border-right:none; border-bottom:2px solid var(--encre); } .zpage,.zpage-photo{ min-height:300px; } }
+
+/* Photo grid inside a series */
+/* BAJO — city hero (the Mercuriales towers of Bagnolet) */
+.bajo-hero{ margin:0 0 40px; padding:24px 22px 16px; border:2.5px solid var(--encre); border-radius:3px;
+  box-shadow:8px 8px 0 var(--tang); background:linear-gradient(180deg, rgba(255,106,23,.06), rgba(8,176,194,.05)); }
+.bajo-hero svg{ display:block; width:100%; height:auto; max-height:300px; }
+.bajo-cap{ font-family:'Anton', var(--mono); font-size:1.05rem; text-transform:uppercase; letter-spacing:3px; color:var(--tang-d); text-align:center; margin-top:14px; }
+/* rawer, more brutal display type */
+.head h1.brutal{ font-family:'Anton', var(--display); font-weight:400; letter-spacing:1px; text-transform:uppercase;
+  font-size:clamp(2.6rem,7vw,4.6rem); line-height:.9; }
+
+/* FRAGMENTS — postcards articulated by "knuckles" (joints) — What to do with knuckles? */
+.frag-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--tang-d); margin:0 0 30px; display:inline-flex; align-items:center; gap:8px; border:2px dashed var(--encre); padding:6px 12px; }
+.fragwall{ columns:4 205px; column-gap:34px; }
+.frag{ break-inside:avoid; position:relative; display:block; margin:0 0 48px;
+  background:var(--card); padding:9px 9px 27px; border:2px solid var(--encre); border-radius:2px;
+  box-shadow:5px 5px 0 var(--encre); transition:transform .2s, box-shadow .2s; z-index:1; }
+.frag:nth-child(3n+1){ transform:rotate(-1.8deg); box-shadow:5px 5px 0 var(--cyan); }
+.frag:nth-child(3n+2){ transform:rotate(1.5deg); box-shadow:5px 5px 0 var(--tang); }
+.frag:nth-child(4n){ transform:rotate(-.7deg); }
+.frag:hover{ transform:rotate(0) translateY(-5px); z-index:6; box-shadow:7px 10px 0 var(--encre); }
+.frag img{ width:100%; display:block; filter:saturate(.8) contrast(.92) brightness(1.05) sepia(.12); }
+.frag{ cursor:zoom-in; }
+.shot{ cursor:zoom-in; }
+.flip-photo{ cursor:zoom-in; }
+.zphoto{ cursor:zoom-in; }
+/* Lightbox */
+#lightbox{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center;
+  background:rgba(11,10,8,.93); padding:34px; cursor:zoom-out; animation:fade .25s ease; }
+#lightbox.on{ display:flex; }
+#lightbox img{ max-width:94vw; max-height:90vh; width:auto; height:auto; display:block;
+  border:3px solid var(--paper); box-shadow:0 24px 70px rgba(0,0,0,.6); }
+.lb-close{ position:fixed; top:22px; right:26px; font-family:var(--mono); font-weight:700; font-size:.82rem;
+  text-transform:uppercase; letter-spacing:1px; color:var(--paper); border:2px solid var(--paper); padding:6px 12px; }
+.frag figcaption{ position:absolute; left:0; right:0; bottom:8px; text-align:center;
+  font-family:var(--mono); font-weight:700; font-size:.6rem; letter-spacing:2px; color:var(--tang-d); }
+/* knuckle joint: a dotted link + a round node down to the fragment below in the column */
+.frag::after{ content:""; position:absolute; left:50%; top:calc(100% + 1px); transform:translateX(-50%);
+  width:2px; height:48px; background:repeating-linear-gradient(var(--encre) 0 3px, transparent 3px 6px); opacity:.5; z-index:0; }
+.frag::before{ content:""; position:absolute; left:50%; top:calc(100% + 24px); transform:translate(-50%,-50%);
+  width:13px; height:13px; border-radius:50%; background:var(--paper); border:2.5px solid var(--encre); z-index:2; }
+@media(max-width:600px){ .fragwall{ columns:2 130px; column-gap:22px; } }
+
+/* VIVID — horizontal filmstrip, photos shown whole in their native format (cheese vivid dreams) */
+.aero-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.6px; color:var(--encre-doux); margin:0 0 22px; display:inline-flex; align-items:center; gap:8px; }
+.aero-track{
+  display:flex; align-items:center; gap:26px;
+  overflow-x:auto; overflow-y:hidden;
+  padding:32px 26px 34px; margin:0 -26px;
+  scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+  background:var(--encre);
+  border-top:2px solid var(--encre); border-bottom:2px solid var(--encre);
+  scrollbar-color:var(--encre-pale) transparent;
+}
+.aero-shot{
+  flex:0 0 auto; scroll-snap-align:center;
+  height:min(66vh,560px);
+  margin:0; cursor:zoom-in;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.aero-shot img{ height:100%; width:auto; display:block; }   /* native aspect ratio, no crop, no zoom */
+.aero-shot:hover{ transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,.6); }
+@media(max-width:600px){ .aero-shot{ height:56vh; } }
+
+/* ROUTE — the trip: photos as stops along a dotted trajectory (What to do with knuckles?) */
+.route{ position:relative; max-width:960px; margin:0 auto; padding:6px 0 30px; }
+.route-line{ position:absolute; left:50%; top:40px; bottom:40px; width:6px; transform:translateX(-50%); z-index:0;
+  background-image:radial-gradient(circle, var(--encre) 2.4px, transparent 2.9px);
+  background-size:6px 15px; background-repeat:repeat-y; background-position:center; opacity:.5; }
+.route-head{ text-align:center; font-family:var(--mono); font-weight:700; text-transform:uppercase; letter-spacing:3px;
+  font-size:.82rem; color:var(--tang-d); position:relative; z-index:2; margin:0; }
+.route-head.end{ margin-top:10px; }
+.station{ position:relative; display:grid; grid-template-columns:1fr 1fr; align-items:center; margin:30px 0; z-index:1; }
+.station::after{ content:""; position:absolute; top:50%; transform:translateY(-50%); height:2px; width:44px; background:var(--encre); opacity:.45; z-index:1; }
+.station.left::after{ right:50%; } .station.right::after{ left:50%; }
+.station .card{ width:min(370px,100%); }
+.station.left .card{ grid-column:1; justify-self:end; padding-right:44px; }
+.station.right .card{ grid-column:2; justify-self:start; padding-left:44px; }
+.rphoto{ line-height:0; }
+.rphoto img{ width:100%; display:block; box-shadow:0 14px 30px -16px rgba(25,23,20,.5);
+  filter:blur(3.5px) saturate(.8) contrast(.9) brightness(1.05) sepia(.12); transition:filter .5s ease, transform .3s; }
+.rphoto.infocus img, .station:hover .rphoto img{ filter:blur(0) saturate(.85) contrast(.95) brightness(1.04) sepia(.08); }
+.rmeta{ margin-top:9px; font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1px;
+  display:flex; gap:14px; color:var(--encre-pale); }
+.station.right .rmeta{ justify-content:flex-end; }
+.rkm{ color:var(--tang-d); font-weight:700; }
+.node{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:15px; height:15px; border-radius:50%;
+  background:var(--tang); border:2.5px solid var(--encre); z-index:3; transition:transform .3s; }
+.station:hover .node{ transform:translate(-50%,-50%) scale(1.35); }
+@media(max-width:640px){
+  .route-line{ left:20px; }
+  .station{ grid-template-columns:1fr; }
+  .station.left .card,.station.right .card{ grid-column:1; justify-self:start; padding:0 0 0 44px; }
+  .station::after{ left:20px; right:auto; width:24px; }
+  .node{ left:20px; }
+  .station.right .rmeta{ justify-content:flex-start; }
+}
+
+/* Night gallery — late lights: the day fades to night, photos glow in the dark */
+.nightwrap{ background:linear-gradient(180deg, #3b352a 0%, #241f18 26%, #15110d 62%, #0b0a08 100%);
+  border:2.5px solid var(--encre); border-radius:3px; padding:30px 26px 36px; box-shadow:8px 8px 0 var(--tang); }
+.night-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:#d9c9a6; margin-bottom:28px; }
+.nightwrap .shot{ break-inside:avoid; margin-bottom:26px; position:relative; line-height:0; }
+.nightwrap .shot img{ width:100%; display:block; filter:saturate(1.03) contrast(.98) brightness(1.04);
+  box-shadow:0 0 30px -4px rgba(255,224,170,.22), 0 16px 34px -16px rgba(0,0,0,.7); transition:box-shadow .3s, transform .22s; }
+.nightwrap .shot:hover{ transform:translateY(-4px); }
+.nightwrap .shot:hover img{ box-shadow:0 0 48px -2px rgba(255,224,170,.42), 0 22px 42px -16px rgba(0,0,0,.78); }
+
+/* About me */
+.bar nav a.nav-about{ color:var(--tang-d); }
+.bar nav a.nav-about:hover{ border-color:var(--cyan); color:var(--encre); }
+.about{ display:flex; gap:38px; flex-wrap:wrap; align-items:flex-start; padding-bottom:40px; max-width:920px; }
+.about-photo{ margin:0; width:290px; max-width:100%; flex-shrink:0; border:2.5px solid var(--encre);
+  box-shadow:8px 8px 0 var(--cyan); background:var(--card); border-radius:2px; }
+.about-photo img{ width:100%; display:block; }
+.about-photo.empty{ aspect-ratio:4/5; position:relative; }
+.about-photo.empty::after{ content:"your photo — soon"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:.78rem; text-transform:uppercase; letter-spacing:1px; color:var(--encre-pale);
+  background:repeating-linear-gradient(45deg, rgba(8,176,194,.16) 0 14px, rgba(255,106,23,.16) 14px 28px); }
+.about-text{ flex:1; min-width:280px; }
+.about-text p{ font-family:var(--mono); font-size:.92rem; line-height:1.85; color:var(--encre-doux); margin-bottom:18px; max-width:56ch; }
+.about-hi{ font-family:var(--display)!important; font-weight:700!important; font-size:1.4rem!important; color:var(--encre)!important; line-height:1.2!important; }
+.about-reach{ margin-bottom:22px; }
+.about-reach a{ display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-weight:700; font-size:.86rem;
+  text-transform:uppercase; letter-spacing:1px; color:var(--encre); background:var(--card);
+  border:2.5px solid var(--encre); box-shadow:4px 4px 0 var(--tang); padding:9px 16px; transition:transform .14s, box-shadow .14s; }
+.about-reach a:hover{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--tang); color:var(--tang-d); }
+.about-sign{ font-family:var(--display)!important; font-weight:700; font-size:1.1rem; color:var(--tang-d)!important; }
+
+.bajo-lead{ margin:0 0 30px; line-height:0; }
+.bajo-lead img{ width:100%; display:block;
+  box-shadow:0 20px 44px -20px rgba(25,23,20,.55);
+  filter:saturate(.8) contrast(.92) brightness(1.05) sepia(.12); }
+
+.gallery{ columns:3 280px; column-gap:26px; }
+.shot{
+  break-inside:avoid; margin-bottom:26px; position:relative; line-height:0;
+  transition:transform .22s, box-shadow .22s;
+}
+.shot:hover{ transform:translateY(-4px); }
+/* frameless, chic — just the photo with a soft lift, plus one shared film grade */
+.shot img{ width:100%; display:block;
+  box-shadow:0 16px 34px -18px rgba(25,23,20,.5);
+  filter:saturate(.8) contrast(.92) brightness(1.05) sepia(.12); }
+.shot:hover img{ box-shadow:0 24px 42px -18px rgba(25,23,20,.6); }
+.shot .ph{
+  aspect-ratio:4/5; border:2px solid var(--encre);
+  background:repeating-linear-gradient(-45deg, rgba(8,176,194,.45) 0 14px, rgba(255,106,23,.45) 14px 28px);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--encre); font-family:var(--mono); font-size:.74rem; text-align:center; padding:12px;
+}
+.shot .cap{
+  position:absolute; bottom:9px; left:0; right:0; text-align:center;
+  font-family:var(--mono); font-size:.8rem; color:var(--encre-doux);
+}
+
+.project-body{ padding-bottom:70px; }
+.project-body .lead{ font-family:var(--mono); color:var(--encre-doux); max-width:560px; margin-bottom:34px; font-size:.9rem; line-height:1.7; }
+.project-body .lead.lead-em{ font-style:italic; }
+
+/* "No dead ends" — always an onward link at the bottom */
+.onward{
+  margin-top:20px; padding:24px 0 90px;
+  border-top:2px solid var(--encre);
+  display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.onward a{
+  font-family:var(--mono); font-weight:700; font-size:.8rem; text-transform:uppercase;
+  letter-spacing:.5px; color:var(--encre);
+  display:inline-flex; align-items:center; gap:8px; transition:gap .18s,color .18s;
+  border-bottom:2px solid transparent;
+}
+.onward a:hover{ color:var(--tang-d); border-color:var(--tang); }
+.onward a.next:hover{ gap:12px; color:var(--cyan-d); border-color:var(--cyan); }
+
+/* Footer */
+footer{ text-align:center; padding:44px 0; color:var(--encre-pale);
+  font-family:var(--mono); font-size:.76rem; text-transform:uppercase; letter-spacing:1px;
+  border-top:2px solid var(--encre); }
+footer em{ font-style:normal; color:var(--encre-doux); }
+
+@media(max-width:640px){
+  .options{ grid-template-columns:1fr; }
+  .option{ transform:rotate(0)!important; min-height:auto; }
+  .gallery{ columns:2 140px; }
+}
+</style>
+</head>
+
+<body>
+<div class="sky"></div>
+
+<header class="bar">
+  <div class="wrap">
+    <a href="#/" class="brand">✦ Layers with no dead ends</a>
+    <nav>
+      <a href="#/words">Poetry</a>
+      <a href="#/images">Images</a>
+      <a href="#/sounds">Playlists</a>
+      <a href="#/about" class="nav-about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer class="wrap">
+  <p><em>Layers with no dead ends</em> — a place made of sounds, poems &amp; images.</p>
+</footer>
+
+<!-- =================================================================
+     CONTENT — everything lives here.
+     To add a project: copy one block inside the right section's
+     "projects" list and fill it in. Nothing else to touch.
+     ================================================================= -->
+<script>
+const SITE = {
+  sections: [
+    /* ============================ LAYER 1 ============================ */
+    {
+      id: "words",
+      layer: "Layer i",
+      label: "Poetry",
+      tagline: "Collections, fanzines & verse",
+      blurb: "Verses gathered across the seasons — each collection, a mood.",
+      projects: [
+        {
+          id: "between-comets-and-roots",
+          title: "Between Comets and Roots",
+          lower: true,
+          featured: true,
+          kind: "Poetry & photography",
+          subtitle: "a sarabande of stars slowly burning like a bona nit",
+          lead: "maybe you hear the dusty comets too",
+          leadItalic: true,
+          type: "duet",
+          author: "matthieu barbarin",
+          cover: "photos/bcar/cover.jpeg",
+          bg: "photos/bcar/bg-palau.jpg",
+          playlist: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3ZcrzE9V0UrL0uP6ZwSrXs?utm_source=generator&si=3337757a15444cc6" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`,
+          pieces: [
+            { n:1, title:"hypé", date:"july 2024", photo:"photos/bcar/01-hype.jpeg", poem:"cooling down digital drinks\nlaser knives through the motions\nflooding in veins\n\na song you’ve never heard\nyou follow my lead\none hundred and seventy one seconds\n\nbodies shying ahead\nhands taming hips\nspotlights birthing\nquiet flames\non the dancefloor\ngemonies stairs remaining\nin the back\n\nwe text more than we danced\nbuilding stones\n\nyour stare under my skin\nsighing promises\n\none hundred\nseventy one seconds" },
+            { n:2, title:"sarabande", date:"august 2024", photo:"photos/bcar/02-sarabande.jpeg", poem:"crafty evening\nfingertips breathing out\nshaping up affection\n\nit’s a sarabande\nlayers within — a crowd\nthat barely noticed\nour eyes dancing\n\nyour soft intensity\nslowly burning indecision\n\nno way back\nno tokens taken\nas venus dismisses satellites\nthursdays are the sweetest months" },
+            { n:3, title:"adentro / afuera", date:"august 2024", photo:"photos/bcar/03-adentro-afuera.jpeg", poem:"slowness in the water\ndevours thighs\nchlorine released our skins\nour syntax setting up\n\nsurrendering necks\nrawness licking shivers\nadentro\n\ndrinking sweat\nballet of hands\nknees on the asphalt\npatency long gone\n\nvademecum in a rush\nforehead to forehead\nafuera\n\nlater in a hallway\nyour most tender kiss\nnext-to-last verse\nno end in sight" },
+            { n:4, title:"☁️", date:"september 2024", photo:"photos/bcar/04-clouding-codes.jpeg", poem:"clouding codes\nyour stories come first\nyour face headlining\nsometimes your partner too\n\n— i am your partner in waiting\n\nslightly obsessed\ncould text you til daybreak\nno nudes needed\nintimacy dressed up\n\nwordlessly we agree\nwe hold back\nwe can’t run out of steam\n\nfamiliar chorus\nuntold synchro\n\nether slides on nothingness\nfull of our clouds\nour story on top" },
+            { n:5, title:"capricorn", date:"september 2024", photo:"photos/bcar/05-capricorn.jpeg", poem:"trains lose tracks\nmoonlights go missing\n\nand while leaves remain on towers\nvirgo grounds leo\n\nlaws of september\n\ni’ll see you in a month\nand i’ll miss you\nin a month and two days" },
+            { n:6, title:"tropics", date:"september 2024", photo:"photos/bcar/06-tropics.jpeg", poem:"haven’t heard from you\nin a little while\nit’s ok\nwe’re\nhalfway\n\ntropics of a harp\nin the back of my head\nright keys cracking\none of its chords\n\ntenacious melody\nfighting evaporation\nof your hands\nsteady memories\nunbroken\n\n— i’m a grown up\n\nwhen i don’t hear from you\nin a little while\ni breathe in i breathe out\n\nit’s ok" },
+            { n:7, title:"#f28500", date:"october 2024", photo:"photos/bcar/07-f28500.jpeg", poem:"puerta del sol — haziness\nbear feeding heart stealers\n\nmind stolen\nlooking towards the east coast\noval tower on a beach\n\nclouds of fire\nin the sky\nfour petals\non the ground\n\nbreezes of tangerine\nmemories of your eyes\ngrinning at me\nlike a zest\nsweeter than lemon\nfueling tenderness\n\nwe’re walking on wires\nbreathing the same air\nfrom apart\n\nsoon\nwe’ll fly over petals" },
+            { n:8, title:"bendings", date:"october 2024", photo:"photos/bcar/08-bendings.jpeg", poem:"in a splashing white t-shirt\nyour gait is bending air\nlast waves of the summer\npalm trees going in retreat\n\nwandering like tourists\ninsular bubble on a weekday\nafterhours denied\n\nyour lips on the elevator\nour bodies en sudor\ncurtains watching our choreos\nwe look at them too\nin the mirrors\nfuming sheets in the back\n\nat times we smile like kids\nbut you do me como debe ser\nwords and silences alternating\nintensity kicks in\ncarmín on our cheeks\n\nwhen we leave we’re aware\nsummer just waved at october\nexuding shades of cyan" },
+            { n:9, title:"cameo", date:"january 2025", photo:"photos/bcar/09-cameo.jpeg", poem:"hey birthday boy\n\nyour cameo is a no show\nthere was no party though\nyou can’t complain\n\nit’s alright birthday boy\n\nan inner partition\nyou don’t want to watch\njanuary eating up feelings\n\nlisten aquarius\n\ntrumpets of neptune\nsoft bells ringing\nstill and unfazed\n\nyour cameo is a no show\nhe cares for you though\n\nno lines to read between\ncomets and roots\nthey are bonding\nin mutism" },
+            { n:10, title:"interstices", date:"january 2025", photo:"photos/bcar/10-interstices.jpeg", poem:"lifeless neutrons\nsometimes\nmonths are interstices\n\nwe are good\ntidbits once and then\nreal stuff for IRL\n\ndefinition unwanted\nwe are spaces\nfloating\nmemories as guardians\nno matter what\n\nacross the mountains\nour silences in dm\ntrust them\n\ni envision you\nwhen you text\nsparks in your eyes\n\neven if sometimes\nmonths are interstices\ni feel secure" },
+            { n:11, title:"warmth in the winter", date:"february 2025", photo:"photos/bcar/11-warmth-in-the-winter.jpeg", poem:"i realized on my ride\nto see you\nwe meet once\nevery season\n\nhere we are\nwe never rush\nour first winter\nabout to finish\nwhen it just started\n\nhours were minutes\ndrippin’\nwe drank them all\nconsumed\n\nmore springs looming\ngentle like your hand\nscratching my hair\nhalf-asleep and complete\n\nmore horizons rising\ncoming up like your lips\nwhen i rode over\nthe salt of your chest" },
+            { n:12, title:"ouverture", date:"february 2025", photo:"photos/bcar/12-ouverture.jpeg", poem:"tonight\nwhen you left\nwith the sun\n\ni realized\nwe’ll meet more seasons\n\nin dms\nin silences\nin real\n\nsky and underground\nrooting for us\n\ni think\nwe’ll meet more seasons\nand what i feel\n\nis not seasonal" },
+            { n:13, title:"torpedo", date:"july 2025", photo:"photos/bcar/13-torpedo.jpeg", poem:"becoming strangers\ndead fireworks\nsmoke of silence\nin torino\n\nyour empty words\nlive ghosting me\nbridges of the unsaid\nin a torpedo\n\nthick air firing\ncold granitas\nbergamotto melting\non my mouth\n\non our left\nsparkles holding\nsway over us\n\non your right\nme watching you\nlooking at your phone" },
+            { n:14, title:"gas", date:"july 2025", photo:"photos/bcar/14-gas.jpeg", poem:"you’re logging off\nbut you don’t break\nyou say\nthere is\nnothing to break\n\ngaslighting veins\n\ntried to make myself\npretty\nput on a new shirt\nit’s purple\nyou notice\nmeaningless shorts\nbrown like the churros\nyou’d devour\nbefore eating me\nback then\n\nyour feelings out of reach\nyour hands cold\nlike the fruits\nyou always put\nin the fridge" },
+            { n:15, title:"narcissist", date:"july 2025", photo:"photos/bcar/15-narcissist.jpeg", poem:"i try\nagain\nyou’re next\nto me\nten minutes\nno talking\n\ni discern\nemojis\nto someone else\non your phone\nten minutes\nno talking\n\ni see\na purple devil\nyou like him - you like them\non your dms\nten minutes\nno talking\n\nit hits me\ni understand\nyou’re someone else\nnext to me\nten minutes\ni’m leaving" },
+            { n:16, title:"emperador", date:"july 2025", photo:"photos/bcar/16-emperador.jpeg", poem:"earlier a letter\nyou went on a full\nflight mode\nyet\nyou keep liking\nmy stories\n\ntightropes\n\nlater a rooftop\nwe pretend\neverything is fine\nkiller smiles\ndroopy eyes\nour story\n\ntight\n\nsunset urges me\nto run away\ni listen\n\nyour partner offers\na shoulder to cry on\nwithout knowing\n\nmaybe he knows" },
+            { n:17, title:"carousel", date:"august 2025", photo:"photos/bcar/17-carousel.jpeg", poem:"tonight\nwatching patterns\n\nother birds singing to you\nwhite screens blue faces\nten foot away\n\nthey don’t know\nyou won’t join them at night\n\nyou can’t lie at nights\n\ni know\nyou’re a day milker\na lust spider\nspinning their melodies\nin your carousel\n\ntonight i sing to others too\nwhite lights no screens\nmy cheap vendetta\n\na day milker\nyou leave the room\nwith your partner\nbirds in ruins\n\ni miss our days\nat times" },
+            { n:18, title:"options", date:"august 2025", photo:"photos/bcar/18-options.jpeg", poem:"was i an option\n\ngave you\nmy best angles\nto understand\n\nmy anxiety\nfogging up your space\nyour void\nfreezing mine\ndull knives\nhardened butter\n\nsomeone sent me\na video\ni stand on a podium\nwith a stupid trophy\nthere i can see you\nfrom the back\nnot clapping not looking\n\ni met an american charm\ncouple hours last night\nsome daydreaming\ni don’t mind being his option\n\nbut am i an option\nfor you" },
+            { n:19, title:"swiss mist", date:"august 2025", photo:"photos/bcar/19-swiss-mist.jpeg", poem:"you’re on my way again\ncan’t avoid you every time\nyou act weird\ntrees and stairs humming\n\na blondie comes and goes\nyou want him he wants you\ni say go for it - you deny\ntrees and stairs humming\n\nminutes later\nyou’re on my way again\nmaking out with him - hidden\ntrees and stairs humming\n\nlater\ni apologize\ni don’t mean it\nyou deny again\nyou mean it\n\nyour warm hand on my face\ncondescending kiss in the air\nour lies humming\nbeneath trees and stairs" },
+            { n:20, title:"talk", date:"fall 2025", photo:"photos/bcar/20-talk.jpeg", poem:"a tramway on the back\nsunday grunts in a park\nwe talk a bit\nhow this summer hit\na fuzzy disaster\nwe make peace\nwe can’t go back to ether\nbut we can be friends\n\n— i woke up this morning\nit struck me\nyour fears of confrontation\nprotecting your walls\nsliding over water\n\nyou’ll fade away\nno crab nebula\nyour whatsapp from top to bottom\nno switch this time\n\n— our dusty comets\nhad a good run\ndigital traces rooted in the sky\nthey talk no talk\n\nand across triangles\non your terrace\nmaybe you hear them\ntoo ." }
+          ]
+        },
+        {
+          id: "youre-so-cool-you-crush-me",
+          title: "you're so cool, you crush me",
+          lower: true,
+          featured: true,
+          kind: "Fanzine \u00b7 poetry & photography",
+          subtitle: "five acts, one crush",
+          lead: "A series of a 5-act poems celebrating the beauty and the chaos of one crush.",
+          type: "zine",
+          author: "matthieu barbarin",
+          cover: "photos/yscycm/cover.jpeg",
+          thumb: "photos/yscycm/poster.jpeg",
+          playlist: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3GXy0Phhs5AciF55a8OGVA?utm_source=generator&si=99df26b18f0a4b8b" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`,
+          pieces: [
+            { n:1, title:"the warning", photo:"photos/yscycm/01-the-warning.jpeg", caption:null, poem:"Maria-Christina stares at me,\nShe seems amused\nI don't care about her anymore.\n\nI care about your text\nI was on your mind all week.\n\nYour grammar over my thoughts\n                    over my ceiling\n                         over La Borbón.\n\nDoes she know about hushing dreams ?\n\nViolet tulips everywhere at the Prado,\nYours will be bright and yellow.\n\nWords talking to my veins,\nGentrification of my body,\nHead scrolling anticipation.\n\nI was on your mind all week." },
+            { n:2, title:"umbrella", photo:"photos/yscycm/02-umbrella.jpeg", caption:null, poem:"I took your umbrella,\nYour twistering fingers,\nYou sound nervous, or anxious.\nYou have a crush\n- on someone else.\n\nThe nearness of you,\nThe nearness of the vacant,\nCraving a rain\nTo get even closer.\n\nNo scintillating light over the bridge,\nOnly your laugh glowing in the dark.\n\nI took your umbrella.\nBut it won't rain tonight\nNow that I'm with you." },
+            { n:3, title:"green hearts", photo:"photos/yscycm/03-green-hearts.jpeg", caption:null, poem:"Mirrors on the screen,\nReflection on my clouds.\nA web I'm stuck into,\nA web I'm well into.\n\nThe green of your eyes,\nThe green of the leaves, blindfolding me.\nYour static energy colors illusions.\n\nMisleading crush,\nMixtaping stuff.\n\nWhy am I a green heart when you are a green heart too ?\n\nUnpacked off sleeves,\nGreen hearts just can't meet." },
+            { n:4, title:"callao", photo:"photos/yscycm/04-callao.jpeg", caption:null, poem:"Found Callao again today,\nI like random like my bottoms.\n\nWe met.\nSky was skyes,\nDark grey clouds milking adrenaline\nTowards the Capitol cheap red signs.\nAnd then your sight, out of nowhere, behind me.\nIt started, it ended, and it started again.\nYour hands on my shoulder,\nDelicate and agitated lashes.\n\nIt gently vanished, nice and easy.\n\nDizziness through my brain now.\nCircumvolution about last night,\nCapital letter signs not enlightened anymore\nin the daylight\nI fucked some other guys instead,\nMilking adrenaline,\nNice and easy.\n\nThe air is still full of your gaze in Callao.\nWe are friends." },
+            { n:5, title:"glimpses of desire away", photo:"photos/yscycm/05-glimpses-of-desire-away.jpeg", caption:null, poem:"Sundays are lighter on my feet.\nGlimpses of desire away.\n\nExternalized crush,\nDon't feel any weaker.\nYou were not the first, nor the last.\nSinging to all your songs,\nCelebrating the chaos in your beauty.\n\nSunday night in Lavapies, open hearts.\nWe talk like old friends,\nLike green hearts that\nwe are\nDrowned in beers,\nBounding.\n\nWhen saying goodbye,\nFelt your hand on my hand,\nThat lasted longer than usual,\nJust a fraction of time, or just an illusion.\n\nStubborn electricity, mind reassured.\n\nGlimpses of desire away,\nI’ll embody your breath someday." }
+          ]
+        },
+        {
+          id: "buoys",
+          title: "buoys",
+          lower: true,
+          kind: "Poetry",
+          subtitle: "an earlier collection & its small cast",
+          lead: "a story of buoys buoys buoys",
+          type: "cast",
+          author: "matthieu barbarin",
+          poems: [
+            { n:1, title:"dms", character:"the wolves", icon:"🐺", poem:"flowers in the garden\ndaily buoys\nsmelling good\nroses and tricks\nback-up plans\n\nthorns in the jungle\ndaily buoys\nit smells\nanemones rooted in hopes\noff the hook\n\ndepleted daisies out there\ndaily buoys\nscentless stems\n\nno means no\nno means more\n\nmeanwhile\n\nout of the dead meadows\nwolves ignore lambs\nlike a triumph" },
+            { n:2, title:"sunglasses", character:"the sunglasses", icon:"🕶️", poem:"malty glares\nyou come to me and say\nyou fancy that guy\nplaying over there\nhis legs like a dream\nwarming up imagination\n\nyou wish you knew\nthe corner of his lips\nand the salt of his eyes\nwhen his head’s going down\n\ni know every bit\n\nhopes dwelling on a sleeve\nyour sunglasses suffocating\n\ni know you want him\nand\nyou want me too" },
+            { n:3, title:"smirk", character:"the confettis", icon:"🎊", poem:"translucid cards\na carefree winter and a story\nready to greet\n\ncounterfeiting projections\nof what could have been\nsparkling confettis\nleaning towards the east station\n\ndrizzling and drops no one can hear\nover the driver's voice\n\nobedient — lackluster — constant\n\nour former selves\nuncasting spells in silence\nlike a smirk on a kiss\n\nmorning stars off the table\na careful night is poaching your sunny tales\n\n—  you're running away" },
+            { n:4, title:"wagons", character:"Lazarus", icon:"🪦", poem:"he fell asleep on my shoulder\nmorning ghosts everywhere\nvivid screens vaguely watching\n\nsounds of colors stroking wagons\n\nvibrations of his breath\nsensing remains and long lost bets\nriding-offs\n\nhis heavy head on my shoulder\nmorning arising outside\nscars and sequels of the stars\n\ni step away at my station\ngently\ni saw you\nbriefly\nwanting to punch me in the face\ndead like Lazarus" },
+            { n:5, title:"crashes", character:"the fortune teller", icon:"🔮", poem:"my head crashes on your body\ntongue on ice\nit melts and it breaks\n\nfortune teller once told me\ni should never trust\nguys who never give back\n\nbut when you give\nyou should never ever expect\nanything in return.\n\nso I just give in\n\niron lines and golden curves\nnumbing paths and icy tongues\nit all blends\nas your shoulders are drifting away\n\ncrashing" },
+            { n:6, title:"interlude", character:"the fanzine", icon:"📰", poem:"heartlines afloat\non a loop\nmiddle ground intertwining airbrushes\nstealing bits\n\ncan’t admit it\nstories smacking floods\ndrafts between copper and lithium\ndiving upward\n\nyou call me baby\ngreen and innocuous\nflashes of a crush\nhomemade fanzine\n\nit’s all over now\nheartlines on a cobalt coast\nwatching your cameos from afar" },
+            { n:7, title:"thumbs", character:"the mojis", icon:"💬", poem:"i can speak in thumbnails\nbundling purple convos\nfragments might feel complete\nfor real for real\n\neuphoria poppin’\nwhen your mojis chime in\nminds firm like stickin’\nunreal for real\n\nsparkles under cloaks\nfulfilled with our words\nand memories of your stares\nnever screening\n\nbut when others cross lines\nseeking vigor and fever\nled astray\nthen i screen i screen" },
+            { n:8, title:"topdown", character:"the swiss hotel", icon:"🏨", poem:"phosphore shaping up\nraining like sweets\nin a swiss hotel\njust above heaven\n\nyour angular face\ntalking with staccato\nyou don’t have a type\ni’m totally your type\n\narticulations on command\ndoor and windows wide open\nand beneath sheets\ntongues flowing verbal and flesh\n\nspooning heartbeats on your back\nyou’d clean me in the shower\nbetween drops\nevery time we’d wake up\n\nwhen i leave fully clothed\nyou are still naked\nsuperb and lonely\nwe kiss and hug no talking\n\ni miss our bedroom eyes\n— sometimes" },
+            { n:9, title:"entropy", character:"the tightrope walkers", icon:"🎪", poem:"mask on\nsubway crying over june\ni don’t wear mine\ni can see the future\nyour eyes taking off\n\ndays later making out\nentropies near a castle\ntightrope walkers lurking\ndrools\n\nat times you’d freak out\nyour partner could find out\nsugar rushing up sorrow\n\nafter the last strokes\ndancing like the dead\n\nyou’d block me\nfears in decay\n\nindefinitely" },
+            { n:10, title:"hey", character:"the vampires", icon:"🧛", poem:"tension built up\nlistening to vampires\ntexting for months\nwe don’t know each other\nbut we connect\n\n— hello goodbyes\n\nwhen we met\nsummer disbanded all ears\nchasing august and soundtracks\non a tipsy night\n\nback then i had no idea\ni’d fall for somebody else\n\n— going south\n\nback to texting\nyou felt\nlust morphing into pastel\nfriendship becoming cardinal" }
+          ]
+        },
+        {
+          id: "watching-steps",
+          title: "watching steps",
+          lower: true,
+          kind: "Poetry",
+          subtitle: "five poems, taken one step at a time",
+          lead: "5 poems, 5 portraits, 5 steps",
+          type: "stairs",
+          author: "matthieu barbarin",
+          poems: [
+            { n:1, title:"rearview", poem:"the parking lot is beaming\nthere might be dust in your body\n\nsheet metal collapsing under shy clouds\nbackseats ignoring dazzling wheels\nlike it’s nothing\n\na blurred conversation froze\none second, maybe four\n\nradio blasting nostalgia and warm blood\nmoving mountains days gone with dreams\nyou’d never share\n\nyou know i’ll pretend\nthat I haven’t seen\nyour stare sticking like truth\nand the fear the fear the fear\ntrapped in the rearview" },
+            { n:2, title:"witnesses", poem:"trunks in the sea\nfaces down\nback of cranes\nstaring at the sky\nin the small hours of the night\n\ntrunks in the sea\ncoasts screaming in silence\nsilenced stewed organs\ndrowned dreams in corals\ntwo hours’ drive away\n\nscions in the sand\nroasted by seaweeds and smugglers\nsoaking up summer and aluminum\nwheels of salt nibbling\nas north’s belfries sobs\n\nas we wonder seekers get along" },
+            { n:3, title:"tunes", poem:"ninja tunes\ni’m all ears\nwhile landscapes\nsee clearly\nyour distant touch\n\nyou’re safe now\nbut\nthe world\nain’t much brighter" },
+            { n:4, title:"mondays", poem:"monday like a mourning soldier\n\ncrossed this woman’s path\nfacing a tragedy\nshe’s lost her niece\nher dignity upfront\nit’s all over the news\n\nmonday like a mourning soldier\n\ncrossed another path\nfive minutes later\nshe’s having a baby\nher motionless joy\nall over the room\n\nmost of the times\nlike soldiers\n\nwomen exude" },
+            { n:5, title:"in-between", poem:"camden street stares at her\nsmokeless fire\nmoving inwards\n\nempty cup for hours\ndry eyes no blinking\n\nher blue dress\ngrinding morning fates\nthe back of her phone\nstrangling caffeine\n\nhopes wearing away\ncandles blowing out grey suns\n\ngreen and red lights swirling outside\nin slow motion\nunbothered by orange\n\nat peace" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "images",
+      layer: "Layer ii",
+      label: "Images",
+      tagline: "Photo series",
+      blurb: "Light, shadow, and small nothings worth holding on to.",
+      projects: [
+        {
+          id: "cheese-vivid-dreams",
+          title: "cheese creates ldn vivid dreams",
+          lower: true,
+          featured: true,
+          thumb: "photos/cheese/c09.jpg",
+          kind: "Photo series",
+          subtitle: "london, on film",
+          lead: "cheese before bed, and the city comes back in cuts — no thread, just contrasts. scroll sideways.",
+          type: "vivid",
+          photos: [
+            { src: "photos/cheese/c03.jpg" },
+            { src: "photos/cheese/c23.jpg" },
+            { src: "photos/cheese/c11.jpg" },
+            { src: "photos/cheese/c28.jpg" },
+            { src: "photos/cheese/c05.jpg" },
+            { src: "photos/cheese/c29.jpg" },
+            { src: "photos/cheese/c08.jpg" },
+            { src: "photos/cheese/c27.jpg" },
+            { src: "photos/cheese/c13.jpg" },
+            { src: "photos/cheese/c26.jpg" },
+            { src: "photos/cheese/c15.jpg" },
+            { src: "photos/cheese/c24.jpg" },
+            { src: "photos/cheese/c07.jpg" },
+            { src: "photos/cheese/c31.jpg" },
+            { src: "photos/cheese/c17.jpg" },
+            { src: "photos/cheese/c10.jpg" },
+            { src: "photos/cheese/c20.jpg" },
+            { src: "photos/cheese/c22.jpg" },
+            { src: "photos/cheese/c02.jpg" },
+            { src: "photos/cheese/c25.jpg" },
+            { src: "photos/cheese/c04.jpg" },
+            { src: "photos/cheese/c09.jpg" },
+            { src: "photos/cheese/c01.jpg" },
+            { src: "photos/cheese/c21.jpg" },
+            { src: "photos/cheese/c30.jpg" },
+            { src: "photos/cheese/c14.jpg" },
+            { src: "photos/cheese/c12.jpg" },
+            { src: "photos/cheese/c16.jpg" },
+            { src: "photos/cheese/c18.jpg" },
+            { src: "photos/cheese/c06.jpg" },
+            { src: "photos/cheese/c19.jpg" }
+          ]
+        },
+        {
+          id: "late-lights",
+          title: "late lights misc of the ego",
+          lower: true,
+          featured: true,
+          thumb: "photos/latemisc/lm01.jpg",
+          kind: "Photo series",
+          subtitle: "you won't hunt me down",
+          lead: "",
+          type: "photos",
+          night: true,
+          photos: [
+            { src: "photos/latemisc/lm39.jpg" },
+            { src: "photos/latemisc/lm35.jpg" },
+            { src: "photos/latemisc/lm01.jpg" },
+            { src: "photos/latemisc/lm03.jpg" },
+            { src: "photos/latemisc/lm14.jpg" },
+            { src: "photos/latemisc/lm22.jpg" },
+            { src: "photos/latemisc/lm38.jpg" },
+            { src: "photos/latemisc/lm25.jpg" },
+            { src: "photos/latemisc/lm34.jpg" },
+            { src: "photos/latemisc/lm77.jpg" },
+            { src: "photos/latemisc/lm37.jpg" },
+            { src: "photos/latemisc/lm24.jpg" },
+            { src: "photos/latemisc/lm41.jpg" },
+            { src: "photos/latemisc/lm04.jpg" },
+            { src: "photos/latemisc/lm45.jpg" },
+            { src: "photos/latemisc/lm32.jpg" },
+            { src: "photos/latemisc/lm26.jpg" },
+            { src: "photos/latemisc/lm11.jpg" },
+            { src: "photos/latemisc/lm50.jpg" },
+            { src: "photos/latemisc/lm44.jpg" },
+            { src: "photos/latemisc/lm40.jpg" },
+            { src: "photos/latemisc/lm28.jpg" },
+            { src: "photos/latemisc/lm09.jpg" },
+            { src: "photos/latemisc/lm33.jpg" },
+            { src: "photos/latemisc/lm27.jpg" },
+            { src: "photos/latemisc/lm47.jpg" },
+            { src: "photos/latemisc/lm21.jpg" },
+            { src: "photos/latemisc/lm29.jpg" },
+            { src: "photos/latemisc/lm48.jpg" },
+            { src: "photos/latemisc/lm68.jpg" },
+            { src: "photos/latemisc/lm15.jpg" },
+            { src: "photos/latemisc/lm69.jpg" },
+            { src: "photos/latemisc/lm12.jpg" },
+            { src: "photos/latemisc/lm23.jpg" },
+            { src: "photos/latemisc/lm08.jpg" },
+            { src: "photos/latemisc/lm76.jpg" },
+            { src: "photos/latemisc/lm17.jpg" },
+            { src: "photos/latemisc/lm82.jpg" },
+            { src: "photos/latemisc/lm62.jpg" },
+            { src: "photos/latemisc/lm46.jpg" },
+            { src: "photos/latemisc/lm16.jpg" },
+            { src: "photos/latemisc/lm83.jpg" },
+            { src: "photos/latemisc/lm78.jpg" },
+            { src: "photos/latemisc/lm64.jpg" },
+            { src: "photos/latemisc/lm30.jpg" },
+            { src: "photos/latemisc/lm43.jpg" },
+            { src: "photos/latemisc/lm65.jpg" },
+            { src: "photos/latemisc/lm36.jpg" },
+            { src: "photos/latemisc/lm10.jpg" },
+            { src: "photos/latemisc/lm51.jpg" },
+            { src: "photos/latemisc/lm84.jpg" },
+            { src: "photos/latemisc/lm55.jpg" },
+            { src: "photos/latemisc/lm70.jpg" },
+            { src: "photos/latemisc/lm75.jpg" },
+            { src: "photos/latemisc/lm56.jpg" },
+            { src: "photos/latemisc/lm07.jpg" },
+            { src: "photos/latemisc/lm42.jpg" },
+            { src: "photos/latemisc/lm31.jpg" },
+            { src: "photos/latemisc/lm02.jpg" },
+            { src: "photos/latemisc/lm85.jpg" },
+            { src: "photos/latemisc/lm59.jpg" },
+            { src: "photos/latemisc/lm52.jpg" },
+            { src: "photos/latemisc/lm73.jpg" },
+            { src: "photos/latemisc/lm81.jpg" },
+            { src: "photos/latemisc/lm13.jpg" },
+            { src: "photos/latemisc/lm63.jpg" },
+            { src: "photos/latemisc/lm60.jpg" },
+            { src: "photos/latemisc/lm57.jpg" },
+            { src: "photos/latemisc/lm06.jpg" },
+            { src: "photos/latemisc/lm66.jpg" },
+            { src: "photos/latemisc/lm71.jpg" },
+            { src: "photos/latemisc/lm54.jpg" },
+            { src: "photos/latemisc/lm67.jpg" },
+            { src: "photos/latemisc/lm53.jpg" },
+            { src: "photos/latemisc/lm61.jpg" },
+            { src: "photos/latemisc/lm05.jpg" },
+            { src: "photos/latemisc/lm79.jpg" },
+            { src: "photos/latemisc/lm72.jpg" },
+            { src: "photos/latemisc/lm18.jpg" },
+            { src: "photos/latemisc/lm19.jpg" },
+            { src: "photos/latemisc/lm49.jpg" },
+            { src: "photos/latemisc/lm20.jpg" },
+            { src: "photos/latemisc/lm58.jpg" },
+            { src: "photos/latemisc/lm74.jpg" },
+            { src: "photos/latemisc/lm88.jpg" },
+            { src: "photos/latemisc/lm91.jpg" },
+            { src: "photos/latemisc/lm90.jpg" },
+            { src: "photos/latemisc/lm86.jpg" },
+            { src: "photos/latemisc/lm87.jpg" },
+            { src: "photos/latemisc/lm89.jpg" },
+            { src: "photos/latemisc/lm92.jpg" },
+            { src: "photos/latemisc/lm93.jpg" },
+            { src: "photos/latemisc/lm94.jpg" }
+          ]
+        },
+        {
+          id: "knuckles",
+          title: "What to do with knuckles?",
+          lower: true,
+          kind: "Photo series",
+          subtitle: "yeah, what to do ?",
+          lead: "",
+          type: "fragments",
+          photos: [
+            { src: "photos/knuckles/k01.jpg" },
+            { src: "photos/knuckles/k02.jpg" },
+            { src: "photos/knuckles/k03.jpg" },
+            { src: "photos/knuckles/k04.jpg" },
+            { src: "photos/knuckles/k05.jpg" },
+            { src: "photos/knuckles/k06.jpg" },
+            { src: "photos/knuckles/k07.jpg" },
+            { src: "photos/knuckles/k08.jpg" },
+            { src: "photos/knuckles/k09.jpg" },
+            { src: "photos/knuckles/k10.jpg" },
+            { src: "photos/knuckles/k11.jpg" },
+            { src: "photos/knuckles/k12.jpg" },
+            { src: "photos/knuckles/k13.jpg" },
+            { src: "photos/knuckles/k14.jpg" },
+            { src: "photos/knuckles/k15.jpg" },
+            { src: "photos/knuckles/k16.jpg" },
+            { src: "photos/knuckles/k17.jpg" },
+            { src: "photos/knuckles/k18.jpg" },
+            { src: "photos/knuckles/k19.jpg" },
+            { src: "photos/knuckles/k20.jpg" },
+            { src: "photos/knuckles/k21.jpg" },
+            { src: "photos/knuckles/k22.jpg" },
+            { src: "photos/knuckles/k23.jpg" },
+            { src: "photos/knuckles/k24.jpg" },
+            { src: "photos/knuckles/k25.jpg" },
+            { src: "photos/knuckles/k26.jpg" },
+            { src: "photos/knuckles/k29.jpg" },
+            { src: "photos/knuckles/k30.jpg" },
+            { src: "photos/knuckles/k31.jpg" },
+            { src: "photos/knuckles/k32.jpg" },
+            { src: "photos/knuckles/k33.jpg" },
+            { src: "photos/knuckles/k36.jpg" },
+            { src: "photos/knuckles/k37.jpg" },
+            { src: "photos/knuckles/k38.jpg" },
+            { src: "photos/knuckles/k39.jpg" },
+            { src: "photos/knuckles/k40.jpg" },
+            { src: "photos/knuckles/k41.jpg" },
+            { src: "photos/knuckles/k42.jpg" },
+            { src: "photos/knuckles/k43.jpg" },
+            { src: "photos/knuckles/k44.jpg" },
+            { src: "photos/knuckles/k45.jpg" },
+            { src: "photos/knuckles/k47.jpg" },
+            { src: "photos/knuckles/k48.jpg" },
+            { src: "photos/knuckles/k49.jpg" },
+            { src: "photos/knuckles/k50.jpg" },
+            { src: "photos/knuckles/k51.jpg" },
+            { src: "photos/knuckles/k52.jpg" },
+            { src: "photos/knuckles/k53.jpg" },
+            { src: "photos/knuckles/k54.jpg" },
+            { src: "photos/knuckles/k55.jpg" },
+            { src: "photos/knuckles/k56.jpg" },
+            { src: "photos/knuckles/k57.jpg" },
+            { src: "photos/knuckles/k58.jpg" },
+            { src: "photos/knuckles/k59.jpg" },
+            { src: "photos/knuckles/k60.jpg" },
+            { src: "photos/knuckles/k61.jpg" },
+            { src: "photos/knuckles/k62.jpg" },
+            { src: "photos/knuckles/k63.jpg" },
+            { src: "photos/knuckles/k64.jpg" },
+            { src: "photos/knuckles/k65.jpg" },
+            { src: "photos/knuckles/k66.jpg" },
+            { src: "photos/knuckles/k67.jpg" },
+            { src: "photos/knuckles/k68h.jpg" },
+            { src: "photos/knuckles/k69.jpg" },
+            { src: "photos/knuckles/k70.jpg" },
+            { src: "photos/knuckles/k71.jpg" },
+            { src: "photos/knuckles/k72.jpg" },
+            { src: "photos/knuckles/k73.jpg" },
+            { src: "photos/knuckles/k74.jpg" },
+            { src: "photos/knuckles/k75.jpg" },
+            { src: "photos/knuckles/k76.jpg" },
+            { src: "photos/knuckles/k77.jpg" },
+            { src: "photos/knuckles/k78.jpg" },
+            { src: "photos/knuckles/k79.jpg" },
+            { src: "photos/knuckles/k80.jpg" },
+            { src: "photos/knuckles/k81.jpg" },
+            { src: "photos/knuckles/k82.jpg" },
+            { src: "photos/knuckles/k83.jpg" },
+            { src: "photos/knuckles/k84.jpg" },
+            { src: "photos/knuckles/k85.jpg" },
+            { src: "photos/knuckles/k86.jpg" },
+            { src: "photos/knuckles/k87.jpg" },
+            { src: "photos/knuckles/k88.jpg" },
+            { src: "photos/knuckles/k89.jpg" },
+            { src: "photos/knuckles/k90.jpg" },
+            { src: "photos/knuckles/k91.jpg" },
+            { src: "photos/knuckles/k92.jpg" },
+            { src: "photos/knuckles/k93.jpg" },
+            { src: "photos/knuckles/k94.jpg" },
+            { src: "photos/knuckles/k95.jpg" },
+            { src: "photos/knuckles/k96.jpg" },
+            { src: "photos/knuckles/k97.jpg" },
+            { src: "photos/knuckles/k98.jpg" },
+            { src: "photos/knuckles/k99.jpg" },
+            { src: "photos/knuckles/k100.jpg" },
+            { src: "photos/knuckles/k101.jpg" },
+            { src: "photos/knuckles/k102.jpg" },
+            { src: "photos/knuckles/k103.jpg" },
+            { src: "photos/knuckles/k104.jpg" },
+            { src: "photos/knuckles/k105.jpg" },
+            { src: "photos/knuckles/k106.jpg" },
+            { src: "photos/knuckles/k107.jpg" },
+            { src: "photos/knuckles/k108.jpg" },
+            { src: "photos/knuckles/k109.jpg" },
+            { src: "photos/knuckles/k110.jpg" },
+            { src: "photos/knuckles/k111.jpg" },
+            { src: "photos/knuckles/k112.jpg" },
+            { src: "photos/knuckles/k113.jpg" },
+            { src: "photos/knuckles/k114.jpg" },
+            { src: "photos/knuckles/k115.jpg" }
+          ]
+        },
+        {
+          id: "bajo",
+          title: "Bajo's edges",
+          brutal: true,
+          kind: "Photo series",
+          subtitle: "oh, bagnolet",
+          lead: "",
+          type: "city",
+          feature: "photos/bajo/bajo-lead.jpg",
+          photos: [
+            { src: "photos/bajo/bajo01.jpg", caption: "" },
+            { src: "photos/bajo/bajo02.jpg", caption: "" },
+            { src: "photos/bajo/bajo03.jpg", caption: "" },
+            { src: "photos/bajo/bajo04.jpg", caption: "" },
+            { src: "photos/bajo/bajo05.jpg", caption: "" },
+            { src: "photos/bajo/bajo06.jpg", caption: "" },
+            { src: "photos/bajo/bajo07.jpg", caption: "" },
+            { src: "photos/bajo/bajo08.jpg", caption: "" },
+            { src: "photos/bajo/bajo10.jpg", caption: "" },
+            { src: "photos/bajo/bajo11.jpg", caption: "" },
+            { src: "photos/bajo/bajo12.jpg", caption: "" },
+            { src: "photos/bajo/bajo13.jpg", caption: "" },
+            { src: "photos/bajo/bajo14.jpg", caption: "" },
+            { src: "photos/bajo/bajo15.jpg", caption: "" },
+            { src: "photos/bajo/bajo16.jpg", caption: "" },
+            { src: "photos/bajo/bajo17.jpg", caption: "" },
+            { src: "photos/bajo/bajo18.jpg", caption: "" },
+            { src: "photos/bajo/bajo19.jpg", caption: "" },
+            { src: "photos/bajo/bajo20.jpg", caption: "" },
+            { src: "photos/bajo/bajo21.jpg", caption: "" },
+            { src: "photos/bajo/bajo22.jpg", caption: "" },
+            { src: "photos/bajo/bajo23.jpg", caption: "" },
+            { src: "photos/bajo/bajo24.jpg", caption: "" },
+            { src: "photos/bajo/bajo25.jpg", caption: "" },
+            { src: "photos/bajo/bajo26.jpg", caption: "" },
+            { src: "photos/bajo/bajo27.jpg", caption: "" },
+            { src: "photos/bajo/bajo28.jpg", caption: "" },
+            { src: "photos/bajo/bajo29.jpg", caption: "" },
+            { src: "photos/bajo/bajo30.jpg", caption: "" },
+            { src: "photos/bajo/bajo31.jpg", caption: "" },
+            { src: "photos/bajo/bajo32.jpg", caption: "" },
+            { src: "photos/bajo/bajo33.jpg", caption: "" },
+            { src: "photos/bajo/bajo34.jpg", caption: "" },
+            { src: "photos/bajo/bajo35.jpg", caption: "" },
+            { src: "photos/bajo/bajo36.jpg", caption: "" },
+            { src: "photos/bajo/bajo37.jpg", caption: "" },
+            { src: "photos/bajo/bajo38.jpg", caption: "" },
+            { src: "photos/bajo/bajo39.jpg", caption: "" },
+            { src: "photos/bajo/bajo40.jpg", caption: "" }
+          ]
+        },
+        {
+          id: "more-buoys",
+          title: "more buoys",
+          lower: true,
+          kind: "Photo series",
+          subtitle: "the world around the poems of buoys",
+          lead: "photographs drifting alongside the buoys \u2014 same waters, more buoys.",
+          type: "photos",
+          photos: [
+            { src: "photos/morebuoys/a-42b8c589.jpg", caption: "" },
+            { src: "photos/morebuoys/b-82ad73cc.jpg", caption: "" },
+            { src: "photos/morebuoys/c-2466afee.jpg", caption: "" },
+            { src: "photos/morebuoys/d-ca4269bb.jpg", caption: "" },
+            { src: "photos/morebuoys/e-fd6af86f.jpg", caption: "" },
+            { src: "photos/morebuoys/f-img1072.jpg", caption: "" },
+            { src: "photos/morebuoys/g-img1439.jpg", caption: "" },
+            { src: "photos/morebuoys/h-img2234.jpg", caption: "" },
+            { src: "photos/morebuoys/i-img2451.jpg", caption: "" },
+            { src: "photos/morebuoys/j-img2765.jpg", caption: "" },
+            { src: "photos/morebuoys/k-img2771.jpg", caption: "" },
+            { src: "photos/morebuoys/l-img2822.jpg", caption: "" },
+            { src: "photos/morebuoys/m-img3086.jpg", caption: "" },
+            { src: "photos/morebuoys/n-img3142.jpg", caption: "" },
+            { src: "photos/morebuoys/o-img3414.jpg", caption: "" },
+            { src: "photos/morebuoys/p-img3433.jpg", caption: "" },
+            { src: "photos/morebuoys/q-img3460.jpg", caption: "" },
+            { src: "photos/morebuoys/r-img3506.jpg", caption: "" },
+            { src: "photos/morebuoys/s-img4352.jpg", caption: "" },
+            { src: "photos/morebuoys/t-img5568.jpg", caption: "" },
+            { src: "photos/morebuoys/u-img6721.jpg", caption: "" },
+            { src: "photos/morebuoys/v-img6736.jpg", caption: "" },
+            { src: "photos/morebuoys/w-img7310.jpg", caption: "" }
+          ]
+        }
+      ]
+    },
+    {
+      id: "sounds",
+      layer: "Layer iii",
+      label: "Playlists",
+      tagline: "Playlists always tell a story",
+      blurb: "Playlists always tell a story.",
+      projects: [
+        {
+          id: "monthly-new",
+          title: "i don't send nudes, i make playlists",
+          lower: true,
+          kind: "Monthly playlist",
+          subtitle: "last month's new releases",
+          lead: "A monthly playlist rounding up the new releases of the month just gone.",
+          type: "spotify",
+          // Each month is one entry. "date" (year-month) only controls the order —
+          // newest is shown first automatically, so you can add months in any order.
+          embeds: [
+            { title: "June–July 2026", date: "2026-07", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/24LltCklPy9ebj4uracj3a?utm_source=generator&si=7b934148872142fe" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "May 2026", date: "2026-05", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6syTJr6VVl7QWlDnahT692?utm_source=generator&si=3d8aee8a68934279" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "April 2026", date: "2026-04", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/7xioknHPYggzSWOd2MTLSn?utm_source=generator&si=0cae354c904c4f30" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "March 2026", date: "2026-03", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/4LvRcQn1tDw5IdN14DBuze?utm_source=generator&si=01ebb4c44c9d445c" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "February 2026", date: "2026-02", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3VmKlBv0j3VcP9JMHnEOS4?utm_source=generator&si=1ea89706370b4e00" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "January 2026", date: "2026-01", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0xRl1puBmryuZ6v5uMbtmZ?utm_source=generator&si=14d7bb7ba84f47bf" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "November 2025", date: "2025-11", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6IsWhwJ6qtyvNHYHKONoBY?utm_source=generator&si=abb92b467dc042c7" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "October 2025", date: "2025-10", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/21iRBsmlY35b11xm0P5gQ3?utm_source=generator&si=9185b513625840e7" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "September 2025", date: "2025-09", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0PodCFwO4rimmOy7Omcyit?utm_source=generator&si=170905f2885644ed" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "July–August 2025", date: "2025-08", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1WkjS6afEAvuYvuqQOLLZK?utm_source=generator&si=1b714a43d4054df2" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "June 2025", date: "2025-06", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/5qJFDOsk6muWO7bnI8rwQm?utm_source=generator&si=899f2230cc6c49df" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "May 2025", date: "2025-05", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0hxPjt8g0gs62rzmQP4ada?utm_source=generator&si=54c3f32ba5984c03" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "April 2025", date: "2025-04", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0PlzS992oB08vKBdobTtql?utm_source=generator&si=16f7a5364b874dc2" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "March 2025", date: "2025-03", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2YHFKEOHeaSxfiBMX2XnKW?utm_source=generator&si=d792190074834e71" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "January–February 2025", date: "2025-02", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0HZhHPGq61VxXsnziPvhOS?utm_source=generator&si=d716f2b1d5f54b93" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` }
+          ]
+        },
+        {
+          id: "summer-raul",
+          title: "Collaborative Summer Playlists with Raúl",
+          kind: "Annual playlist",
+          subtitle: "oldies & goodies, every start of summer",
+          lead: "A yearly playlist built together with Raúl at the beginning of summer — all oldies and goodies.",
+          type: "spotify",
+          embeds: [
+            { title: "Summer 2026", date: "2026-06", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/7JwSSSvWZZ0y1LTofHqKT2?utm_source=generator&si=fdd41ac45abc4737" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "Summer 2025", date: "2025-06", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/02sgwNji6FmnPqlzxFyVy9?utm_source=generator&si=c1b0e15012c349e2" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` }
+          ]
+        },
+        {
+          id: "best-albums-year",
+          title: "Best albums of the year : countdowns completed",
+          kind: "Yearly countdown",
+          subtitle: "my top 100 albums, one year at a time",
+          lead: "Each year is a completed countdown: one extract from every one of my 100 favourite albums of that year.",
+          type: "spotify",
+          // One entry per year. Add each year's playlist here (any order — newest shows first).
+          embeds: [
+            { title: "2025", date: "2025-12", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6YaCdADluwF9YFk6CMyI2f?utm_source=generator&si=f33bc1d64d4e45c7" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "2024", date: "2024-12", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3R5YinutSUqa70sORVVAMC?utm_source=generator&si=419820ab599d4983" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` },
+            { title: "2023", date: "2023-12", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2B0oEg15Y8tNOQl9cNOWkm?utm_source=generator&si=afc00b9cb1614604" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` }
+          ]
+        },
+        {
+          id: "best-albums-decade",
+          title: "Best albums of the decade",
+          kind: "Decade countdown",
+          subtitle: "my top 250 albums, one decade at a time",
+          lead: "Same idea, stretched over a whole decade: one extract from each of my 250 favourite albums of the decade.",
+          type: "spotify",
+          // One entry per decade (any order — newest shows first).
+          embeds: [
+            { title: "2010s", date: "2019-12", iframe: `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1NGz528tHoh22YIL1eLa1a?utm_source=generator&si=1fe9da1cbc034bc4" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+/* =================================================================
+   ROUTER + RENDER  (no need to edit below to add content)
+   ================================================================= */
+const app = document.getElementById('app');
+const sectionById = id => SITE.sections.find(s => s.id === id);
+const projectById = (s, id) => s.projects.find(p => p.id === id);
+const esc = t => (t||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function render(){
+  const parts = (location.hash.replace(/^#\/?/, '')).split('/').filter(Boolean);
+  window.scrollTo(0,0);
+  if(parts.length === 0)      return renderHome();
+  if(parts[0] === 'about')    return renderAbout();
+  const section = sectionById(parts[0]);
+  if(!section)                return renderHome();
+  if(parts.length === 1)      return renderSection(section);
+  const project = projectById(section, parts[1]);
+  if(!project)                return renderSection(section);
+  return renderProject(section, project);
+}
+
+function renderAbout(){
+  app.innerHTML = `
+    <section class="view active"><div class="wrap">
+      <div class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span class="here">About</span></div>
+      <div class="head"><p class="kind">hello</p><h1 class="lc">about me</h1></div>
+      <div class="about">
+        <figure class="about-photo"><img src="photos/about/me.jpg" alt="matthieu" onerror="this.style.display='none';this.parentNode.classList.add('empty')"></figure>
+        <div class="about-text">
+          <p class="about-hi">hi, i'm matthieu — welcome.</p>
+          <p>this site is just my little land of layers: playlists that tell stories, poems living next to photographs, and photo series picked up along the way. nothing very serious — more a warm place to keep my odds and ends, and to share them without any dead ends.</p>
+          <p>if something here speaks to you, i'm always up for making something together, just for the fun of it — swapping playlists, writing a few lines four-handed, an illustration project, whatever comes up. don't be shy, reach out.</p>
+          <p class="about-reach"><a href="https://www.instagram.com/matthieubarbarin/" target="_blank" rel="noopener noreferrer"><svg class="ig-logo" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>@matthieubarbarin</a></p>
+          <p class="about-sign">— m.</p>
+        </div>
+      </div>
+      <div class="onward"><a href="#/">&larr; back home</a></div>
+    </div></section>`;
+}
+
+function renderHome(){
+  // --tint = the hard offset shadow color, --tint-ink = the accent text color
+  const tints = {
+    sounds:['var(--tang)','var(--tang-d)'],
+    words: ['var(--cyan)','var(--cyan-d)'],
+    images:['var(--encre)','var(--tang-d)']
+  };
+  const opts = SITE.sections.map((s,i) => `
+    <a class="option" href="#/${s.id}" style="--tint:${tints[s.id][0]};--tint-ink:${tints[s.id][1]}">
+      <span class="layer-no">0${i+1}</span>
+      <h2>${esc(s.label)}</h2>
+      <p>${esc(s.tagline)}</p>
+      <span class="arrow">enter &rarr;</span>
+    </a>`).join('');
+  app.innerHTML = `
+    <section class="view active" id="home"><div class="wrap hub">
+      <h1>Layers <span class="c1">with</span><br>no <span class="c2">dead ends</span></h1>
+      <p class="lede">welcome to the land of my layers, feel free to get lost</p>
+      <div class="options">${opts}</div>
+    </div></section>`;
+}
+
+function renderSection(s){
+  const normalCard = p => {
+    const thumb = p.photos && p.photos.find(x => x.src);
+    const cover = s.id === 'images' ? `<div class="cover">${thumb ? `<img src="${esc(thumb.src)}" alt="" loading="lazy">` : ''}</div>` : '';
+    return `
+      <a class="pcard" href="#/${s.id}/${p.id}">
+        ${cover}
+        <span class="tag">${esc(p.kind)}</span>
+        <h3 class="${p.lower ? 'lc' : ''}">${esc(p.title)}</h3>
+        <p>${esc(p.subtitle)}</p>
+        <div class="count">${countLabel(p)}</div>
+      </a>`;
+  };
+  const featCard = p => {
+    const banner = p.thumb || p.cover || (p.photos && (p.photos.find(function(x){return x.src;})||{}).src);
+    return `
+      <a class="fcard" href="#/${s.id}/${p.id}">
+        ${banner ? `<div class="fcover"><img src="${esc(banner)}" alt="cover of ${esc(p.title)}" loading="lazy"></div>` : ''}
+        <div class="fbody">
+          <span class="tag">${esc(p.kind)}</span>
+          <h3 class="${p.lower ? 'lc' : ''}">${esc(p.title)}</h3>
+          <p>${esc(p.lead || p.subtitle)}</p>
+          <div class="count">${countLabel(p)}</div>
+        </div>
+      </a>`;
+  };
+
+  const featured = s.projects.filter(p => p.featured);
+  const rest = s.projects.filter(p => !p.featured);
+  let content = '';
+  if(featured.length) content += `<div class="feat-grid">${featured.map(featCard).join('')}</div>`;
+  if(rest.length) content += `${featured.length ? `<p class="more-label">more to wander</p>` : ''}<div class="projects">${rest.map(normalCard).join('')}</div>`;
+
+  app.innerHTML = `
+    <section class="view active" data-theme="${s.id}"><div class="wrap">
+      <div class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span class="here">${esc(s.label)}</span></div>
+      <div class="head">
+        <p class="kind">${esc(s.layer)}</p>
+        <h1>${esc(s.label)}</h1>
+        <p>${esc(s.blurb)}</p>
+      </div>
+      <div class="section-content">${content}</div>
+    </div></section>`;
+}
+
+function countLabel(p){
+  if(p.type === 'spotify') return !(p.embeds?.length) ? 'soon' : (p.embeds.length>1 ? p.embeds.length + ' editions' : '▶ listen');
+  if(p.type === 'duet')    return (p.pieces?.length||0) + ' poems + photos';
+  if(p.type === 'cast')    return (p.poems?.length||0) + ' poems';
+  if(p.type === 'stairs')  return (p.poems?.length||0) + ' poems';
+  if(p.type === 'zine')    return (p.pieces?.length||0) + ' poems + photos';
+  if(p.type === 'poems')   return (p.poems?.length||0) + (p.poems?.length===1?' poem':' poems');
+  if(p.type === 'photos' || p.type === 'city' || p.type === 'route' || p.type === 'fragments' || p.type === 'vivid')  return (p.photos?.length||0) + (p.photos?.length===1?' photo':' photos');
+  return '';
+}
+
+function renderProject(s, p){
+  let body = '';
+  if(p.type === 'spotify'){
+    // Newest first: sort by the hidden "date" key (e.g. "2025-03") descending.
+    const items = p.embeds.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+    body = items.length
+      ? `<div class="embeds">` + items.map(e => `
+      <div class="embed-box">
+        <h4>${esc(e.title)}</h4>
+        <div class="embed-slot${e.iframe ? ' filled' : ''}">${e.iframe ? e.iframe : 'Paste your Spotify embed here'}</div>
+      </div>`).join('') + `</div>`
+      : `<div class="embeds"><div class="embed-box"><div class="embed-slot">Playlists coming soon</div></div></div>`;
+  } else if(p.type === 'duet'){
+    const pad = n => String(n).padStart(2,'0');
+    const cover = p.cover ? `<img class="duet-cover" src="${esc(p.cover)}" alt="cover of ${esc(p.title)}">` : '';
+    const tiles = p.pieces.map(pc => {
+      const back = pc.photo
+        ? `<img class="flip-photo" src="${esc(pc.photo)}" alt="photograph for ${esc(pc.title)}" loading="lazy" onerror="imgFail(this)" onclick="event.stopPropagation(); zoom('${esc(pc.photo)}')">`
+        : `<div class="flip-missing">photo to come</div>`;
+      return `
+      <div class="flip${pc.photo ? '' : ' nophoto'}" onclick="flip(this)">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <span class="corner">turn ⟳</span>
+            <span class="flip-num">${pad(pc.n)}</span>
+            <h4 class="flip-title lc">${esc(pc.title)}</h4>
+            <div class="flip-poem">${esc(pc.poem)}</div>
+            ${pc.date ? `<div class="flip-date">${esc(pc.date)}</div>` : ''}
+          </div>
+          <div class="flip-face flip-back">
+            <span class="corner">${pad(pc.n)}</span>
+            ${back}
+            <span class="flip-cap">${pad(pc.n)} · ${esc(pc.title)}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    const head = (p.cover || p.playlist) ? `<div class="duet-head">${cover}${p.playlist ? `<div class="duet-playlist">${p.playlist}</div>` : ''}</div>` : '';
+    body = `${head}<p class="duet-hint">tap a card to turn poem ↔ photo</p><div class="duet-grid">${tiles}</div>`;
+  } else if(p.type === 'cast'){
+    const pad = n => String(n).padStart(2,'0');
+    const buoys = p.poems.map((pc,i) => `
+      <button class="buoy" data-target="cast-${pc.n}" onclick="castJump(this)" title="${esc(pc.character)}" aria-label="${esc(pc.character)}" style="animation-delay:${(i*0.3).toFixed(2)}s">
+        <span class="buoy-icon">${esc(pc.icon)}</span><span class="buoy-n">${pad(pc.n)}</span>
+      </button>`).join('');
+    const cols = p.poems.map(pc => `
+      <article class="cast-poem" id="cast-${pc.n}">
+        <div class="cast-head">
+          <span class="cast-n">${pad(pc.n)}</span>
+          <h4 class="cast-title lc">${esc(pc.title)}</h4>
+          <span class="cast-icon" title="${esc(pc.character)}">${esc(pc.icon)}</span>
+        </div>
+        <div class="cast-verse">${esc(pc.poem)}</div>
+      </article>`).join('');
+    body = `
+      <div class="cast-sea">
+        <p class="cast-label">the cast — one thing from each poem, adrift together · tap a name to meet it</p>
+        <div class="cast">${buoys}</div>
+      </div>
+      <div class="cast-poems">${cols}</div>`;
+  } else if(p.type === 'zine'){
+    const pad = n => String(n).padStart(2,'0');
+    const cover = p.cover ? `<img class="zine-cover" src="${esc(p.cover)}" alt="cover of ${esc(p.title)}">` : '';
+    const head = (p.cover || p.playlist) ? `<div class="zine-head">${cover}${p.playlist ? `<div class="zine-playlist">${p.playlist}</div>` : ''}</div>` : '';
+    const spreads = p.pieces.map((pc,i) => `
+      <div class="spread${i===0 ? ' active' : ''}">
+        <div class="zpage zpage-text">
+          <span class="znum">${pad(pc.n)} / ${pad(p.pieces.length)}</span>
+          <h4 class="ztitle lc">${esc(pc.title)}</h4>
+          <div class="zverse">${esc(pc.poem)}</div>
+        </div>
+        <div class="zpage zpage-photo">
+          <img class="zphoto" src="${esc(pc.photo)}" alt="photograph for ${esc(pc.title)}" loading="lazy" onerror="imgFail(this)" onclick="event.stopPropagation(); zoom('${esc(pc.photo)}')">
+          ${pc.caption ? `<p class="zcap">${esc(pc.caption)}</p>` : ''}
+        </div>
+      </div>`).join('');
+    const dots = p.pieces.map((pc,i) => `<button class="zdot${i===0 ? ' on' : ''}" aria-label="page ${pc.n}" onclick="zineJump(this,${i})"></button>`).join('');
+    body = `
+      ${head}
+      <p class="duet-hint">a fanzine — turn the pages</p>
+      <div class="zine" data-idx="0" data-n="${p.pieces.length}">
+        <div class="zspreads">${spreads}</div>
+        <div class="zctrl">
+          <button class="zbtn" onclick="zineGo(this,-1)">&larr; prev</button>
+          <div class="zdots">${dots}</div>
+          <button class="zbtn" onclick="zineGo(this,1)">next &rarr;</button>
+        </div>
+      </div>`;
+  } else if(p.type === 'stairs'){
+    const pad = n => String(n).padStart(2,'0');
+    const steps = p.poems.map((pc,i) => `
+      <button class="step" data-target="step-${pc.n}" onclick="castJump(this)" style="--i:${i}">
+        <span class="step-n">${pad(pc.n)}</span>
+        <span class="step-t lc">${esc(pc.title)}</span>
+        <span class="step-arrow">↓</span>
+      </button>`).join('');
+    const cols = p.poems.map(pc => `
+      <article class="cast-poem" id="step-${pc.n}">
+        <div class="cast-head">
+          <span class="cast-n">${pad(pc.n)}</span>
+          <h4 class="cast-title lc">${esc(pc.title)}</h4>
+        </div>
+        <div class="cast-verse">${esc(pc.poem)}</div>
+      </article>`).join('');
+    body = `
+      <div class="stairs-view">
+        <p class="cast-label">the steps — take one down to its poem</p>
+        <div class="stairs">${steps}</div>
+        <div class="cast-poems">${cols}</div>
+      </div>`;
+  } else if(p.type === 'poems'){
+    body = `<div class="poems">` + p.poems.map(po => `
+      <article class="poem"><h4>${esc(po.title)}</h4><div class="verse">${esc(po.verse)}</div></article>`).join('') + `</div>`;
+  } else if(p.type === 'fragments'){
+    const pad = n => String(n).padStart(3,'0');
+    const cards = p.photos.map((ph,i) => `
+      <figure class="frag" onclick="zoom('${esc(ph.src)}')">
+        <img src="${esc(ph.src)}" alt="" loading="lazy">
+        <figcaption>&#8226; frag. ${pad(i+1)}</figcaption>
+      </figure>`).join('');
+    body = `<p class="frag-note">fragments, articulated &middot; knuckles hold the pieces together</p><div class="fragwall">${cards}</div>`;
+  } else if(p.type === 'vivid'){
+    const shots = p.photos.map((ph) => `
+      <figure class="aero-shot" onclick="zoom('${esc(ph.src)}')">
+        <img src="${esc(ph.src)}" alt="" loading="lazy">
+      </figure>`).join('');
+    body = `<p class="aero-note">scroll sideways &rarr;</p>
+      <div class="aero-track">${shots}</div>`;
+  } else if(p.type === 'route'){
+    const pad = n => String(n).padStart(2,'0');
+    const total = p.photos.length;
+    let acc = 0;
+    const stations = p.photos.map((ph,i) => {
+      if(i>0) acc += 4 + (i*37)%13;
+      const side = i%2===0 ? 'left' : 'right';
+      return `
+      <div class="station ${side}">
+        <div class="card">
+          <figure class="rphoto"><img src="${esc(ph.src)}" alt="" loading="lazy"></figure>
+          <div class="rmeta"><span class="rkm">km ${acc}</span><span>stop ${pad(i+1)}/${pad(total)}</span></div>
+        </div>
+        <span class="node"></span>
+      </div>`;
+    }).join('');
+    body = `
+      <div class="route">
+        <p class="route-head">&#9673; départ</p>
+        <div class="route-line"></div>
+        ${stations}
+        <p class="route-head end">terminus &#9673;</p>
+      </div>`;
+  } else if(p.type === 'photos' || p.type === 'city'){
+    let hero = '';
+    if(p.type === 'city'){
+      // the two Mercuriales towers of Bagnolet — drawn by a shaky hand, not a ruler
+      const facade = (x,y,w,h,tilt) => {
+        let g = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--tang)" stroke="var(--encre)" stroke-width="3"/>`;
+        let fy=y+10, k=0;
+        while(fy < y+h-4){ g += `<line x1="${x}" y1="${fy}" x2="${x+w}" y2="${fy}" stroke="rgba(255,251,246,.5)" stroke-width="1.4"/>`; fy += (k%3===2?11:8); k++; }
+        g += `<line x1="${x+w*0.35}" y1="${y+2}" x2="${x+w*0.33}" y2="${y+h}" stroke="rgba(255,251,246,.4)" stroke-width="1.6"/>`;
+        g += `<line x1="${x+w*0.66}" y1="${y}" x2="${x+w*0.68}" y2="${y+h}" stroke="rgba(255,251,246,.4)" stroke-width="1.6"/>`;
+        g += `<line x1="${x+w/2-2}" y1="${y}" x2="${x+w/2+3}" y2="${y-26}" stroke="var(--encre)" stroke-width="2.5"/>`;
+        return `<g transform="rotate(${tilt} ${x+w/2} ${y+h})">${g}</g>`;
+      };
+      const box = (x,y,w,h,fill,tilt) => `<g transform="rotate(${tilt} ${x+w/2} ${y+h})"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="var(--encre)" stroke-width="2.5"/></g>`;
+      let cars = '';
+      for(let cx=42,i=0; cx<858; cx+=42+((i%2)?9:0), i++) cars += `<rect x="${cx}" y="${299+(i%2?2:0)}" width="${15+(i%3)*3}" height="7" rx="2" fill="var(--encre)" opacity=".5"/>`;
+      let rays = '';
+      for(let a=8;a<360;a+=45){ const r=a*Math.PI/180; rays += `<line x1="${(450+Math.cos(r)*50).toFixed(1)}" y1="${(150+Math.sin(r)*50).toFixed(1)}" x2="${(450+Math.cos(r)*66).toFixed(1)}" y2="${(150+Math.sin(r)*66).toFixed(1)}" stroke="var(--tang)" stroke-width="2.5" opacity=".55"/>`; }
+      hero = `
+        <div class="bajo-hero">
+          <svg viewBox="0 0 900 348" preserveAspectRatio="xMidYMid meet" role="img" aria-label="the Mercuriales towers of Bagnolet, hand-drawn">
+            <defs><filter id="bajoRough" x="-6%" y="-8%" width="112%" height="120%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.013 0.019" numOctaves="2" seed="5" result="n"/>
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="6.5" xChannelSelector="R" yChannelSelector="G"/>
+            </filter></defs>
+            <circle cx="450" cy="150" r="92" fill="var(--tang)" opacity=".13"/>
+            <g filter="url(#bajoRough)" stroke-linecap="round" stroke-linejoin="round">
+              ${rays}
+              <circle cx="450" cy="150" r="38" fill="var(--tang)" opacity=".3" stroke="var(--tang)" stroke-width="2.5"/>
+              ${box(118,206,60,74,'var(--cyan)',-2)}${box(182,231,44,49,'var(--paper2)',1.4)}
+              ${box(690,214,66,66,'var(--cyan)',1.5)}${box(760,236,50,44,'var(--paper2)',-1.2)}
+              ${facade(394,96,56,184,-2.4)}
+              ${facade(456,68,56,212,1.6)}
+              <path d="M18,284 C 210,277 350,289 470,283 S 772,277 884,286" fill="none" stroke="var(--encre)" stroke-width="3.5"/>
+              ${cars}
+              <path d="M22,316 q 210,-6 430,0 t 428,0" fill="none" stroke="var(--encre)" stroke-width="1.6" stroke-dasharray="13 12" opacity=".5"/>
+            </g>
+          </svg>
+          <p class="bajo-cap">48.865&deg;N&nbsp;&middot;&nbsp;2.418&deg;E</p>
+        </div>`;
+    }
+    const feature = p.feature ? `<figure class="bajo-lead"><img src="${esc(p.feature)}" alt="${esc(p.title)}" loading="lazy"></figure>` : '';
+    const grid = `<div class="gallery">` + p.photos.map(ph => `
+      <figure class="shot"${ph.src ? ` onclick="zoom('${esc(ph.src)}')"` : ''}>
+        ${ph.src ? `<img src="${esc(ph.src)}" alt="${esc(ph.caption)}" loading="lazy">` : `<div class="ph">your photo here</div>`}
+        <figcaption class="cap">${esc(ph.caption)}</figcaption>
+      </figure>`).join('') + `</div>`;
+    body = p.night
+      ? `<div class="nightwrap"><p class="night-note">the day runs out as you go &darr;</p>${grid}</div>`
+      : hero + feature + grid;
+  }
+
+  // No dead ends: back to the layer, and on to the next project.
+  const idx = s.projects.indexOf(p);
+  const next = s.projects[(idx + 1) % s.projects.length];
+  const nextLink = s.projects.length > 1
+    ? `<a class="next" href="#/${s.id}/${next.id}">next in ${esc(s.label)}: ${esc(next.title)} &rarr;</a>`
+    : `<a class="next" href="#/">back to home &rarr;</a>`;
+
+  app.innerHTML = `
+    <section class="view active${p.bg ? ' has-bg' : ''}" data-theme="${s.id}">
+      ${p.bg ? `<div class="page-bg" style="background-image:url('${esc(p.bg)}')"></div><div class="page-bg-veil"></div>` : ''}
+      <div class="wrap">
+      <div class="crumbs">
+        <a href="#/">Home</a><span class="sep">/</span>
+        <a href="#/${s.id}">${esc(s.label)}</a><span class="sep">/</span>
+        <span class="here${p.lower ? ' lc' : ''}">${esc(p.title)}</span>
+      </div>
+      <div class="head">
+        <p class="kind">${esc(p.kind)}</p>
+        <h1 class="${p.lower ? 'lc' : ''}${p.brutal ? ' brutal' : ''}">${esc(p.title)}</h1>
+        ${p.subtitle ? `<p>${esc(p.subtitle)}</p>` : ''}
+        ${p.author ? `<p class="byline${p.lower ? ' lc' : ''}">by ${esc(p.author)}</p>` : ''}
+      </div>
+      <div class="project-body">
+        ${p.lead ? `<p class="lead${p.leadItalic ? ' lead-em' : ''}">${esc(p.lead)}</p>` : ''}
+        ${body}
+      </div>
+      <div class="onward">
+        <a href="#/${s.id}">&larr; back to ${esc(s.label)}</a>
+        ${nextLink}
+      </div>
+    </div></section>`;
+  if(p.type === 'route') setupRouteFocus();
+}
+// Route (the trip): a photo comes into focus only as it passes the centre of the screen.
+window.setupRouteFocus = function(){
+  if(!('IntersectionObserver' in window)) { document.querySelectorAll('.route .rphoto').forEach(function(el){ el.classList.add('infocus'); }); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ e.target.classList.toggle('infocus', e.isIntersecting); });
+  }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
+  document.querySelectorAll('.route .rphoto').forEach(function(el){ io.observe(el); });
+};
+
+// Duet tiles: turn a card from poem to photo (and back) on click.
+window.flip = function(el){ el.classList.toggle('flipped'); };
+// If a photo file isn't there (yet), show the "photo to come" placeholder instead of a broken image.
+window.imgFail = function(img){ img.outerHTML = '<div class="flip-missing">photo to come</div>'; };
+// Lightbox: click a photo to see it larger, in its own format.
+window.zoom = function(src){
+  var lb = document.getElementById('lightbox');
+  if(!lb){ lb = document.createElement('div'); lb.id = 'lightbox';
+    lb.addEventListener('click', function(){ lb.classList.remove('on'); lb.innerHTML=''; });
+    document.body.appendChild(lb);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ lb.classList.remove('on'); lb.innerHTML=''; } });
+  }
+  lb.innerHTML = '<img src="'+src+'" alt=""><span class="lb-close">close &times;</span>';
+  lb.classList.add('on');
+};
+// Cast (buoys): tap a floating character to jump to its poem and flash it.
+window.castJump = function(el){ var t = document.getElementById(el.dataset.target); if(!t) return;
+  t.scrollIntoView({behavior:'smooth', block:'center'}); t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); };
+// Zine (fanzine): leaf through spreads one at a time.
+window.zineShow = function(z, idx){ z.dataset.idx = idx;
+  z.querySelectorAll('.spread').forEach(function(s,i){ s.classList.toggle('active', i===idx); });
+  z.querySelectorAll('.zdot').forEach(function(d,i){ d.classList.toggle('on', i===idx); }); };
+window.zineGo = function(btn, dir){ var z = btn.closest('.zine'); var n = +z.dataset.n;
+  var idx = ((+z.dataset.idx) + dir + n) % n; zineShow(z, idx); };
+window.zineJump = function(btn, i){ zineShow(btn.closest('.zine'), i); };
+
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>
