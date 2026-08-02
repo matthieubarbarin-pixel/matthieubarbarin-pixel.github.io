@@ -63,6 +63,8 @@ button{ font-family:inherit; cursor:pointer; border:none; background:none; }
     linear-gradient(90deg, rgba(25,23,20,.045) 1px, transparent 1px);
   background-size:26px 26px;
 }
+/* on plain-background collections (poems read on the page), drop the grid */
+body.plain-bg .sky{ background-image:none; }
 /* a couple of loose color blooms so it isn't sterile */
 .sky::after{
   content:""; position:absolute; inset:0;
@@ -374,7 +376,7 @@ header.bar{
 .cast-n{ font-family:var(--mono); font-weight:700; font-size:.8rem; color:var(--cyan-d); }
 .cast-title{ font-family:var(--display); font-weight:700; text-transform:uppercase; font-size:1.4rem; letter-spacing:-.5px; color:var(--encre); }
 .cast-icon{ font-size:1.15rem; line-height:1; cursor:default; }
-.cast-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.9; white-space:pre-line; color:var(--encre-doux); }
+.cast-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.5; white-space:pre-line; color:var(--encre-doux); }
 
 /* Stairs — a staircase of steps linking to each poem (collection: watching steps) */
 .stairs{ margin:0 0 48px; }
@@ -420,7 +422,7 @@ header.bar{
 .oyster-hint{ text-align:center; font-family:var(--mono); font-size:.72rem; color:var(--encre-pale); margin:14px 0 42px; }
 .oyster-poems{ max-width:660px; margin:0 auto; }
 .oyster-poem .pearl-omonth{ font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--cyan-d); }
-.oyster-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.9; white-space:pre-wrap; color:var(--encre-doux); }
+.oyster-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.5; white-space:pre-wrap; color:var(--encre-doux); }
 /* pearl-string preview on the featured card */
 .pearl-cover{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding:30px 22px; min-height:150px; background:var(--card); }
 .mini-pearl{ width:20px; height:20px; border-radius:50%; border:2px dashed var(--encre-pale); }
@@ -682,6 +684,7 @@ const SITE = {
       projects: [
         {
           id: "feelings-dressed-in-oyster-pearls",
+          plainBg: true,
           years: "2026",
           title: "feelings dressed in oyster pearls",
           lower: true,
@@ -1065,6 +1068,7 @@ our anemic smiles in a tangent` }
         },
         {
           id: "buoys",
+          plainBg: true,
           years: "2022/2024",
           title: "buoys",
           lower: true,
@@ -1088,6 +1092,7 @@ our anemic smiles in a tangent` }
         },
         {
           id: "watching-steps",
+          plainBg: true,
           years: "2021/2024",
           title: "watching steps",
           lower: true,
@@ -1561,6 +1566,7 @@ const esc = t => (t||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 function render(){
   const parts = (location.hash.replace(/^#\/?/, '')).split('/').filter(Boolean);
   window.scrollTo(0,0);
+  document.body.classList.remove('plain-bg');
   if(parts.length === 0)      return renderHome();
   if(parts[0] === 'about')    return renderAbout();
   const section = sectionById(parts[0]);
@@ -1676,6 +1682,7 @@ function countLabel(p){
 
 function renderProject(s, p){
   let body = '';
+  if(p.plainBg) document.body.classList.add('plain-bg');
   if(p.type === 'spotify'){
     // Newest first: sort by the hidden "date" key (e.g. "2025-03") descending.
     const items = p.embeds.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
