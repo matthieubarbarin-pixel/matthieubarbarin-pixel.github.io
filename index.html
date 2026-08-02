@@ -194,6 +194,8 @@ header.bar{
   display:inline-block; border:2px solid currentColor; padding:3px 9px;
   transform:rotate(-1deg);
 }
+.head .kind .kind-years{ opacity:.7; letter-spacing:1px; }
+.card-years{ opacity:.72; }
 .head h1{
   font-family:var(--display); font-weight:700; text-transform:uppercase;
   font-size:clamp(2rem,5vw,3.4rem); letter-spacing:-1px; color:var(--encre);
@@ -646,6 +648,7 @@ const SITE = {
       projects: [
         {
           id: "between-comets-and-roots",
+          years: "2024/2025",
           title: "Between Comets and Roots",
           lower: true,
           featured: true,
@@ -683,6 +686,7 @@ const SITE = {
         },
         {
           id: "youre-so-cool-you-crush-me",
+          years: "2023",
           title: "you're so cool, you crush me",
           lower: true,
           featured: true,
@@ -704,6 +708,7 @@ const SITE = {
         },
         {
           id: "buoys",
+          years: "2022/2024",
           title: "buoys",
           lower: true,
           kind: "Poetry",
@@ -726,6 +731,7 @@ const SITE = {
         },
         {
           id: "watching-steps",
+          years: "2021/2024",
           title: "watching steps",
           lower: true,
           kind: "Poetry",
@@ -1259,7 +1265,7 @@ function renderSection(s){
         <span class="tag">${esc(p.kind)}</span>
         <h3 class="${p.lower ? 'lc' : ''}">${esc(p.title)}</h3>
         <p>${esc(p.subtitle)}</p>
-        <div class="count">${countLabel(p)}</div>
+        <div class="count">${countLabel(p)}${p.years ? ` <span class="card-years">&middot; ${esc(p.years)}</span>` : ''}</div>
       </a>`;
   };
   const featCard = p => {
@@ -1271,7 +1277,7 @@ function renderSection(s){
           <span class="tag">${esc(p.kind)}</span>
           <h3 class="${p.lower ? 'lc' : ''}">${esc(p.title)}</h3>
           <p>${esc(p.lead || p.subtitle)}</p>
-          <div class="count">${countLabel(p)}</div>
+          <div class="count">${countLabel(p)}${p.years ? ` <span class="card-years">&middot; ${esc(p.years)}</span>` : ''}</div>
         </div>
       </a>`;
   };
@@ -1525,7 +1531,7 @@ function renderProject(s, p){
         <span class="here${p.lower ? ' lc' : ''}">${esc(p.title)}</span>
       </div>
       <div class="head">
-        <p class="kind">${esc(p.kind)}</p>
+        <p class="kind">${esc(p.kind)}${p.years ? ` <span class="kind-years">&middot; ${esc(p.years)}</span>` : ''}</p>
         <h1 class="${p.lower ? 'lc' : ''}${p.brutal ? ' brutal' : ''}">${esc(p.title)}</h1>
         ${p.subtitle ? `<p>${esc(p.subtitle)}</p>` : ''}
         ${p.author ? `<p class="byline${p.lower ? ' lc' : ''}">by ${esc(p.author)}</p>` : ''}
