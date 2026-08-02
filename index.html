@@ -395,6 +395,38 @@ header.bar{
 @keyframes stepflash{ 0%{ background:rgba(255,106,23,.18) } 100%{ background:transparent } }
 @media(max-width:600px){ .step{ margin-left:0; } }
 
+/* PEARLS — a living collection forming in real time, one poem a month (feelings dressed in oyster pearls) */
+.oyster-status{ margin:0 0 24px; }
+.oyster-badge{ display:inline-block; font-family:var(--mono); font-size:.66rem; text-transform:uppercase; letter-spacing:2px; color:var(--cyan-d); border:2px solid var(--cyan); border-radius:20px; padding:4px 13px; }
+.oyster-prog{ font-family:var(--mono); font-size:.82rem; color:var(--encre-doux); margin-top:13px; }
+.oyster-prog b{ color:var(--encre); }
+.oyster-bar{ margin-top:9px; height:8px; width:min(320px,100%); background:var(--paper2); border:1.5px solid var(--encre); border-radius:20px; overflow:hidden; }
+.oyster-bar i{ display:block; height:100%; background:linear-gradient(90deg,#efe6ee,#cfe0e8 55%,#b6c8d6); }
+.pearl-string{ display:flex; flex-wrap:wrap; gap:16px 16px; justify-content:center; padding:14px 0 4px; }
+.pearl-item{ width:86px; display:flex; flex-direction:column; align-items:center; gap:7px; background:none; border:none; padding:0; text-align:center; font:inherit; }
+.pearl-item.formed{ cursor:pointer; }
+.pearl-bead{ width:52px; height:52px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #ffffff, #f4ebf1 40%, #dde7ef 68%, #c6b3c2 100%);
+  box-shadow: inset 0 -3px 6px rgba(150,130,150,.35), inset 0 3px 5px rgba(255,255,255,.9), 0 4px 9px rgba(0,0,0,.16);
+  transition:transform .2s; }
+.pearl-item.formed:hover .pearl-bead{ transform:scale(1.12) translateY(-2px); }
+.pearl-item.forming .pearl-bead{ background:transparent; border:2px dashed var(--encre-pale); box-shadow:none; }
+.pearl-item.fresh .pearl-bead{ box-shadow: inset 0 -3px 6px rgba(150,130,150,.35), inset 0 3px 5px rgba(255,255,255,.9), 0 0 0 3px rgba(8,176,194,.30), 0 5px 12px rgba(0,0,0,.18); animation:pearlglow 2.6s ease-in-out infinite; }
+@keyframes pearlglow{ 0%,100%{ filter:brightness(1) } 50%{ filter:brightness(1.09) } }
+@media (prefers-reduced-motion: reduce){ .pearl-item.fresh .pearl-bead{ animation:none; } }
+.pearl-month{ font-family:var(--mono); font-size:.6rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--encre-pale); }
+.pearl-title{ font-family:var(--mono); font-size:.74rem; color:var(--encre); line-height:1.12; }
+.pearl-item.forming .pearl-title{ color:var(--encre-pale); font-style:italic; }
+.oyster-hint{ text-align:center; font-family:var(--mono); font-size:.72rem; color:var(--encre-pale); margin:14px 0 42px; }
+.oyster-poems{ max-width:660px; margin:0 auto; }
+.oyster-poem .pearl-omonth{ font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--cyan-d); }
+.oyster-verse{ font-family:var(--mono); font-size:.9rem; line-height:1.9; white-space:pre-wrap; color:var(--encre-doux); }
+/* pearl-string preview on the featured card */
+.pearl-cover{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding:30px 22px; min-height:150px; background:var(--card); }
+.mini-pearl{ width:20px; height:20px; border-radius:50%; border:2px dashed var(--encre-pale); }
+.mini-pearl.on{ border:none; background:radial-gradient(circle at 34% 30%, #fff, #f4ebf1 45%, #d7e2ea 72%, #c6b3c2 100%); box-shadow:inset 0 -2px 4px rgba(150,130,150,.3), 0 2px 5px rgba(0,0,0,.15); }
+@media(max-width:600px){ .pearl-item{ width:72px; } .pearl-bead{ width:44px; height:44px; } }
+
 /* Zine — a fanzine you leaf through, one spread at a time (collection: you're so cool, you crush me) */
 .zine-head{ display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start; margin-bottom:26px; }
 .zine-cover{ width:280px; max-width:100%; margin:0; border:2.5px solid var(--encre); box-shadow:7px 7px 0 var(--tang); border-radius:2px; }
@@ -648,6 +680,329 @@ const SITE = {
       tagline: "Collections, fanzines & verse",
       blurb: "Verses gathered across the seasons — each collection, a mood.",
       projects: [
+        {
+          id: "feelings-dressed-in-oyster-pearls",
+          years: "2026",
+          title: "feelings dressed in oyster pearls",
+          lower: true,
+          featured: true,
+          status: "in progress · updated monthly",
+          kind: "Poetry",
+          subtitle: "a year in twelve pearls, one a month",
+          lead: "a living collection — a new poem surfaces each month, jan → dec 2026. watch it form in real time.",
+          type: "pearls",
+          total: 12,
+          pieces: [
+            { n:1, month:"january", title:"resolution", poem:`blue blood creaming red
+inert body 
+dressed in oyster pearls
+tentacles in retreat
+
+
+magpies eating blueberries
+three hearts
+sightseeing a nosegay
+white gloves unharmed
+
+
+to not fall
+down the rabbit hole
+finding lores instead
+not a matamore` },
+            { n:2, month:"february", title:"ink", poem:`my berlin wrist stamped
+fun on my left hand
+what’s left for the right 
+
+
+guitars fury
+electric deers 
+in a dead end
+i was the deer
+back then
+
+
+red lights underlining
+or weeping out
+now it’s all dry
+
+
+soft greys
+fueling blue hearts
+and apricots sticks
+he made me spark
+back then
+
+
+brandenburg as a witness
+
+
+only remain
+the idea of him
+no flesh no words
+
+
+a concept
+a stranger
+with no 
+looking back
+
+
+i looked so good this week
+he hasn’t seen it
+muted i know
+
+
+fun fading away
+on my left hand
+what’s left on his right ` },
+            { n:3, month:"march", title:"flag", poem:`underwhelming party
+cheap drinks 
+flowers hunting
+
+
+like having a stroke
+eyes meeting eyes
+mouths blending
+forgetting friends
+
+
+he looks just like him
+just kinetic 
+confused with stars
+they play with me
+
+
+he mentions 
+a red and yellow flag
+boy i should run
+
+
+for hours
+i rub his shoulders 
+they’re swallowing me
+
+
+he looks just like him
+maybe it’s worth falling again
+probably not
+
+
+for now 
+bliss blames warnings
+and at times 
+when he kisses me
+i feel it’s your hands
+playing with my neck
+no pun intended
+i swear
+
+
+i sweat` },
+            { n:4, month:"april", title:"lilac", poem:`last week walked for a bit 
+cleared all my minds
+
+
+saw an old lady shaking her head
+talking to herself 
+like an ostrich that could fly
+in a place with a roof
+
+
+made me think of you
+
+
+today sat for a while
+drafted all my countries
+
+
+i scratch my head
+talk to myself too
+and as lilacs blossom
+in a place with no roots
+
+
+maybe you think of me too` },
+            { n:5, month:"may", title:"daybreakers", poem:`we were a sunset underground
+no sky wanted
+end of the winter
+kicking off
+
+
+it’s over
+
+
+i can see him biking 
+his feelings on mute
+a knight with no war
+
+
+i can see him looming
+over the darkrooms 
+a cell on his chest
+
+
+picking the wrong friends
+always on top
+
+
+i tried
+
+
+we are daybreaks
+his sky is a roof
+my spring in a heartbeat
+when may mirrors winters
+
+
+you missed out 
+a good friend 
+like the swimmer
+i used to know ` },
+            { n:6, month:"june", title:"popping up", poem:`clean socks dirty shoes
+what does it say
+
+
+i hear solstices vanishing
+every year
+
+
+you think about tomorrows
+the same way endings 
+start at summertimes
+
+
+clean socks dirty shoes
+what does it say
+
+
+i feel eclipses showering
+every second
+
+
+you pretend about yesterdays
+the same way spoons
+scrape at summertimes
+
+
+clean socks dirty shoes
+what does it say
+
+
+i remember you drifting
+today
+
+
+you forgot about me
+the same way moons … 
+* caresses at summertimes
+
+
+clean socks dirty shoes
+what does it say
+about 
+             you and I
+                                  what we used to have
+            
+              what we never had` },
+            { n:7, month:"july", title:"anniversary", poem:`we were born on january
+i was born in a different sun 
+
+
+it’s been a year
+and we’re not good at birthdays
+
+
+maybe a memory loss
+would do the trick
+but which face of you to erase
+
+
+the sensual nonchalant
+his gaze heating up dawns
+kissing me in disguise
+sometimes in the street
+swinging through the sheets
+
+
+or
+
+
+el cold emperador
+his chin grasping feelings 
+a soft thunder in his fist
+mi cuore spezzato
+speechless languages
+
+
+vanity of missing the thrill
+and the attention that it brings
+
+
+i met a snail this week
+he talked to me like a lion
+he said the past is a magic place
+and memories a monster with two heads
+
+
+i was in bcn today
+i never felt so far from him
+and the monster was on my shoulder
+
+
+we were born on january
+he was born in a different sun ` },
+            { n:8, month:"august", title:"vitiligo", poem:`going rogue 
+mind the gap 
+
+
+here in a plantroom 
+hackney creatures 
+misfitting amongst misfits 
+
+
+going rogue 
+mind the gap 
+
+
+lighter on my calves 
+but head’s full 
+of renunciations 
+
+
+going rogue 
+mind the gap 
+
+
+last time i went 
+from ldn to bcn 
+his virtual rushes colliding mines
+
+
+we went rogue 
+not minding 
+
+
+this time hits different 
+in a week 
+we’ll be strangers in disguise 
+
+
+going rogue 
+our bodycounts to the ground
+
+
+and when it’ll happen
+i’ll nod to the sun
+its half-baked liquor
+
+
+dead rogue 
+ignoring each other 
+
+
+our anemic smiles in a tangent` }
+          ]
+        },
         {
           id: "between-comets-and-roots",
           years: "2024/2025",
@@ -1273,9 +1628,12 @@ function renderSection(s){
   };
   const featCard = p => {
     const banner = p.thumb || p.cover || (p.photos && (p.photos.find(function(x){return x.src;})||{}).src);
+    const pearlCover = p.type === 'pearls'
+      ? `<div class="fcover pearl-cover">${Array.from({length:p.total||12},(_,i)=>`<span class="mini-pearl${i < (p.pieces?.length||0) ? ' on' : ''}"></span>`).join('')}</div>`
+      : (banner ? `<div class="fcover"><img src="${esc(banner)}" alt="cover of ${esc(p.title)}" loading="lazy"></div>` : '');
     return `
       <a class="fcard" href="#/${s.id}/${p.id}">
-        ${banner ? `<div class="fcover"><img src="${esc(banner)}" alt="cover of ${esc(p.title)}" loading="lazy"></div>` : ''}
+        ${pearlCover}
         <div class="fbody">
           <span class="tag">${esc(p.kind)}</span>
           <h3 class="${p.lower ? 'lc' : ''}">${esc(p.title)}</h3>
@@ -1311,6 +1669,7 @@ function countLabel(p){
   if(p.type === 'stairs')  return (p.poems?.length||0) + ' poems';
   if(p.type === 'zine')    return (p.pieces?.length||0) + ' poems + photos';
   if(p.type === 'poems')   return (p.poems?.length||0) + (p.poems?.length===1?' poem':' poems');
+  if(p.type === 'pearls')  return (p.pieces?.length||0) + ' / ' + (p.total||12) + ' poems · in progress';
   if(p.type === 'photos' || p.type === 'city' || p.type === 'route' || p.type === 'fragments' || p.type === 'vivid')  return (p.photos?.length||0) + (p.photos?.length===1?' photo':' photos');
   return '';
 }
@@ -1428,6 +1787,42 @@ function renderProject(s, p){
   } else if(p.type === 'poems'){
     body = `<div class="poems">` + p.poems.map(po => `
       <article class="poem"><h4>${esc(po.title)}</h4><div class="verse">${esc(po.verse)}</div></article>`).join('') + `</div>`;
+  } else if(p.type === 'pearls'){
+    const MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"];
+    const byMonth = {}; p.pieces.forEach(pc => { byMonth[pc.month] = pc; });
+    const total = p.total || 12;
+    const done = p.pieces.length;
+    const nextMonth = MONTHS.slice(0,total).find(m => !byMonth[m]);
+    const last = p.pieces[p.pieces.length-1];
+    const beads = MONTHS.slice(0,total).map(m => {
+      const pc = byMonth[m], mo = m.slice(0,3);
+      if(pc){
+        const fresh = (last && pc.month === last.month) ? ' fresh' : '';
+        return `<button class="pearl-item formed${fresh}" data-target="oyster-${pc.n}" onclick="castJump(this)" aria-label="${esc(m)}: ${esc(pc.title)}">
+          <span class="pearl-bead"></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title lc">${esc(pc.title)}</span>
+        </button>`;
+      }
+      return `<span class="pearl-item forming" aria-label="${esc(m)}: forming"><span class="pearl-bead"></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title">forming</span></span>`;
+    }).join('');
+    const pct = Math.round(done/total*100);
+    const poems = p.pieces.map(pc => `
+      <article class="cast-poem oyster-poem" id="oyster-${pc.n}">
+        <div class="cast-head">
+          <span class="cast-n">${String(pc.n).padStart(2,'0')}</span>
+          <span class="pearl-omonth lc">${esc(pc.month)}</span>
+          <h4 class="cast-title lc">${esc(pc.title)}</h4>
+        </div>
+        <div class="oyster-verse">${esc(pc.poem)}</div>
+      </article>`).join('');
+    body = `
+      <div class="oyster-status">
+        <span class="oyster-badge">${esc(p.status || 'in progress · updated monthly')}</span>
+        <div class="oyster-prog"><b>${done} / ${total}</b> pearls formed${nextMonth ? ` &middot; next: <b class="lc">${esc(nextMonth)}</b>` : ' &middot; complete'}</div>
+        <div class="oyster-bar"><i style="width:${pct}%"></i></div>
+      </div>
+      <div class="pearl-string">${beads}</div>
+      <p class="oyster-hint">tap a formed pearl to read its month &middot; the pale ones are still forming</p>
+      <div class="cast-poems oyster-poems">${poems}</div>`;
   } else if(p.type === 'fragments'){
     const pad = n => String(n).padStart(3,'0');
     const cards = p.photos.map((ph,i) => `
