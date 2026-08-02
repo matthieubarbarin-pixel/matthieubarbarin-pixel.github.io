@@ -433,7 +433,7 @@ header.bar{
 @keyframes pearlopen{ from{ opacity:0; transform:translateY(10px) scale(.99); } to{ opacity:1; transform:none; } }
 @media(prefers-reduced-motion: reduce){ .oyster-panel.open{ animation:none; } }
 .oyster-panel.open::before{ content:""; position:absolute; top:-15px; left:28px; width:28px; height:28px; border-radius:50%;
-  background:radial-gradient(circle at 34% 30%, #fff, #f4ebf1 42%, #dde7ef 68%, #c6b3c2 100%);
+  background:var(--pearl-bg, radial-gradient(circle at 34% 30%, #fff, #f4ebf1 42%, #dde7ef 68%, #c6b3c2 100%));
   box-shadow: inset 0 -2px 5px rgba(150,130,150,.4), inset 0 2px 4px rgba(255,255,255,.9), 0 3px 7px rgba(0,0,0,.2); }
 .oyster-phead{ display:flex; align-items:baseline; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
 .oyster-pnum{ font-family:var(--mono); font-weight:700; font-size:.8rem; color:var(--cyan-d); }
@@ -713,7 +713,7 @@ const SITE = {
           type: "pearls",
           total: 12,
           pieces: [
-            { n:1, month:"january", title:"resolution", poem:`blue blood creaming red
+            { n:1, month:"january", title:"resolution", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #8f93d1 44%, #3a3676 100%)", poem:`blue blood creaming red
 inert body 
 dressed in oyster pearls
 tentacles in retreat
@@ -729,7 +729,7 @@ to not fall
 down the rabbit hole
 finding lores instead
 not a matamore` },
-            { n:2, month:"february", title:"ink", poem:`my berlin wrist stamped
+            { n:2, month:"february", title:"ink", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #c85055 44%, #6f1416 100%)", poem:`my berlin wrist stamped
 fun on my left hand
 what’s left for the right 
 
@@ -775,7 +775,7 @@ muted i know
 fun fading away
 on my left hand
 what’s left on his right ` },
-            { n:3, month:"march", title:"flag", poem:`underwhelming party
+            { n:3, month:"march", title:"flag", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #f3d552 40%, #db4a3c 100%)", poem:`underwhelming party
 cheap drinks 
 flowers hunting
 
@@ -818,7 +818,7 @@ i swear
 
 
 i sweat` },
-            { n:4, month:"april", title:"lilac", poem:`last week walked for a bit 
+            { n:4, month:"april", title:"lilac", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #dcbdec 44%, #bd8bd8 100%)", poem:`last week walked for a bit 
 cleared all my minds
 
 
@@ -842,7 +842,7 @@ in a place with no roots
 
 
 maybe you think of me too` },
-            { n:5, month:"may", title:"daybreakers", poem:`we were a sunset underground
+            { n:5, month:"may", title:"daybreakers", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #ffd79a 34%, #ff9270 66%, #cf6f96 100%)", poem:`we were a sunset underground
 no sky wanted
 end of the winter
 kicking off
@@ -878,7 +878,7 @@ you missed out
 a good friend 
 like the swimmer
 i used to know ` },
-            { n:6, month:"june", title:"popping up", poem:`clean socks dirty shoes
+            { n:6, month:"june", title:"popping up", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #f0e7dd 42%, #90603f 100%)", poem:`clean socks dirty shoes
 what does it say
 
 
@@ -924,7 +924,7 @@ about
                                   what we used to have
             
               what we never had` },
-            { n:7, month:"july", title:"anniversary", poem:`we were born on january
+            { n:7, month:"july", title:"anniversary", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #fff0ad 40%, #f5c531 100%)", poem:`we were born on january
 i was born in a different sun 
 
 
@@ -971,7 +971,7 @@ and the monster was on my shoulder
 
 we were born on january
 he was born in a different sun ` },
-            { n:8, month:"august", title:"vitiligo", poem:`going rogue 
+            { n:8, month:"august", title:"vitiligo", pearl:"radial-gradient(circle at 34% 30%, #ffffff, #dededb 46%, #a7a7a2 100%)", poem:`going rogue 
 mind the gap 
 
 
@@ -1097,7 +1097,7 @@ our anemic smiles in a tangent` }
           poems: [
             { n:1, title:"dms", character:"the wolves", icon:"🐺", poem:"flowers in the garden\ndaily buoys\nsmelling good\nroses and tricks\nback-up plans\n\nthorns in the jungle\ndaily buoys\nit smells\nanemones rooted in hopes\noff the hook\n\ndepleted daisies out there\ndaily buoys\nscentless stems\n\nno means no\nno means more\n\nmeanwhile\n\nout of the dead meadows\nwolves ignore lambs\nlike a triumph" },
             { n:2, title:"sunglasses", character:"the sunglasses", icon:"🕶️", poem:"malty glares\nyou come to me and say\nyou fancy that guy\nplaying over there\nhis legs like a dream\nwarming up imagination\n\nyou wish you knew\nthe corner of his lips\nand the salt of his eyes\nwhen his head’s going down\n\ni know every bit\n\nhopes dwelling on a sleeve\nyour sunglasses suffocating\n\ni know you want him\nand\nyou want me too" },
-            { n:3, title:"smirk", character:"the confettis", icon:"🎊", poem:"translucid cards\na carefree winter and a story\nready to greet\n\ncounterfeiting projections\nof what could have been\nsparkling confettis\nleaning towards the east station\n\ndrizzling and drops no one can hear\nover the driver's voice\n\nobedient — lackluster — constant\n\nour former selves\nuncasting spells in silence\nlike a smirk on a kiss\n\nmorning stars off the table\na careful night is poaching your sunny tales\n\n—  you're running away" },
+            { n:3, title:"smirk", character:"the taxi", icon:"🚕", poem:"translucid cards\na carefree winter and a story\nready to greet\n\ncounterfeiting projections\nof what could have been\nsparkling confettis\nleaning towards the east station\n\ndrizzling and drops no one can hear\nover the driver's voice\n\nobedient — lackluster — constant\n\nour former selves\nuncasting spells in silence\nlike a smirk on a kiss\n\nmorning stars off the table\na careful night is poaching your sunny tales\n\n—  you're running away" },
             { n:4, title:"wagons", character:"Lazarus", icon:"🪦", poem:"he fell asleep on my shoulder\nmorning ghosts everywhere\nvivid screens vaguely watching\n\nsounds of colors stroking wagons\n\nvibrations of his breath\nsensing remains and long lost bets\nriding-offs\n\nhis heavy head on my shoulder\nmorning arising outside\nscars and sequels of the stars\n\ni step away at my station\ngently\ni saw you\nbriefly\nwanting to punch me in the face\ndead like Lazarus" },
             { n:5, title:"crashes", character:"the fortune teller", icon:"🔮", poem:"my head crashes on your body\ntongue on ice\nit melts and it breaks\n\nfortune teller once told me\ni should never trust\nguys who never give back\n\nbut when you give\nyou should never ever expect\nanything in return.\n\nso I just give in\n\niron lines and golden curves\nnumbing paths and icy tongues\nit all blends\nas your shoulders are drifting away\n\ncrashing" },
             { n:6, title:"interlude", character:"the fanzine", icon:"📰", poem:"heartlines afloat\non a loop\nmiddle ground intertwining airbrushes\nstealing bits\n\ncan’t admit it\nstories smacking floods\ndrafts between copper and lithium\ndiving upward\n\nyou call me baby\ngreen and innocuous\nflashes of a crush\nhomemade fanzine\n\nit’s all over now\nheartlines on a cobalt coast\nwatching your cameos from afar" },
@@ -1652,7 +1652,7 @@ function renderSection(s){
   const featCard = p => {
     const banner = p.thumb || p.cover || (p.photos && (p.photos.find(function(x){return x.src;})||{}).src);
     const pearlCover = p.type === 'pearls'
-      ? `<div class="fcover pearl-cover">${Array.from({length:p.total||12},(_,i)=>`<span class="mini-pearl${i < (p.pieces?.length||0) ? ' on' : ''}"></span>`).join('')}</div>`
+      ? `<div class="fcover pearl-cover">${Array.from({length:p.total||12},(_,i)=>{ const on = i < (p.pieces?.length||0); const col = on && p.pieces[i] && p.pieces[i].pearl ? p.pieces[i].pearl : ''; return `<span class="mini-pearl${on ? ' on' : ''}"${col ? ` style="background:${col}"` : ''}></span>`; }).join('')}</div>`
       : (banner ? `<div class="fcover"><img src="${esc(banner)}" alt="cover of ${esc(p.title)}" loading="lazy"></div>` : '');
     return `
       <a class="fcard" href="#/${s.id}/${p.id}">
@@ -1825,14 +1825,14 @@ function renderProject(s, p){
         const fresh = (last && pc.month === last.month) ? ' fresh' : '';
         const act = (pc.n === activeN) ? ' active' : '';
         return `<button class="pearl-item formed${fresh}${act}" data-target="oyster-${pc.n}" onclick="oysterOpen(this)" aria-label="${esc(m)}: ${esc(pc.title)}">
-          <span class="pearl-bead"></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title lc">${esc(pc.title)}</span>
+          <span class="pearl-bead"${pc.pearl ? ` style="background:${pc.pearl}"` : ''}></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title lc">${esc(pc.title)}</span>
         </button>`;
       }
       return `<span class="pearl-item forming" aria-label="${esc(m)}: forming"><span class="pearl-bead"></span><span class="pearl-month">${esc(mo)}</span><span class="pearl-title">forming</span></span>`;
     }).join('');
     const pct = Math.round(done/total*100);
     const panels = p.pieces.map(pc => `
-      <article class="oyster-panel${pc.n === activeN ? ' open' : ''}" id="oyster-${pc.n}">
+      <article class="oyster-panel${pc.n === activeN ? ' open' : ''}" id="oyster-${pc.n}"${pc.pearl ? ` style="--pearl-bg:${pc.pearl}"` : ''}>
         <div class="oyster-phead">
           <span class="oyster-pnum">${String(pc.n).padStart(2,'0')}</span>
           <span class="pearl-omonth lc">${esc(pc.month)}</span>
