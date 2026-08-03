@@ -120,6 +120,8 @@ header.bar{
      rgba(244,239,226,.52) 50%, rgba(244,239,226,.58) 88%,
      rgba(244,239,226,.80) 100%);
 }
+.view.has-bg .page-bg.page-bg-tile{ background-repeat:repeat; background-position:top left; background-size:min(46vw,360px) auto; filter:saturate(1.05); }
+.view.bg-tiled .page-bg-veil{ background:linear-gradient(180deg, rgba(244,239,226,.72) 0%, rgba(244,239,226,.6) 50%, rgba(244,239,226,.72) 100%); }
 .view.has-bg > .wrap{ position:relative; z-index:2; }
 .view.has-bg .head h1,
 .view.has-bg .head .kind,
@@ -485,7 +487,7 @@ header.bar{
 
 /* FRAGMENTS — postcards articulated by "knuckles" (joints) — What to do with knuckles? */
 .frag-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--tang-d); margin:0 0 30px; display:inline-flex; align-items:center; gap:8px; border:2px dashed var(--encre); padding:6px 12px; }
-.fragwall{ columns:4 205px; column-gap:34px; }
+.fragwall{ columns:3 300px; column-gap:38px; }
 .frag{ break-inside:avoid; position:relative; display:block; margin:0 0 48px;
   background:var(--card); padding:9px 9px 27px; border:2px solid var(--encre); border-radius:2px;
   box-shadow:5px 5px 0 var(--encre); transition:transform .2s, box-shadow .2s; z-index:1; }
@@ -513,7 +515,7 @@ header.bar{
   width:2px; height:48px; background:repeating-linear-gradient(var(--encre) 0 3px, transparent 3px 6px); opacity:.5; z-index:0; }
 .frag::before{ content:""; position:absolute; left:50%; top:calc(100% + 24px); transform:translate(-50%,-50%);
   width:13px; height:13px; border-radius:50%; background:var(--paper); border:2.5px solid var(--encre); z-index:2; }
-@media(max-width:600px){ .fragwall{ columns:2 130px; column-gap:22px; } }
+@media(max-width:600px){ .fragwall{ columns:2 160px; column-gap:24px; } }
 
 /* VIVID — horizontal filmstrip, photos shown whole in their native format (cheese vivid dreams) */
 .aero-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.6px; color:var(--encre-doux); margin:0 0 22px; display:inline-flex; align-items:center; gap:8px; }
@@ -1290,6 +1292,8 @@ our anemic smiles in a tangent` }
           id: "knuckles",
           title: "What to do with knuckles?",
           lower: true,
+          bg: "photos/knuckles/bg-kaleido.jpg",
+          bgMode: "tile",
           kind: "Photo series",
           subtitle: "yeah, what to do ?",
           lead: "",
@@ -1947,8 +1951,8 @@ function renderProject(s, p){
     : `<a class="next" href="#/">back to home &rarr;</a>`;
 
   app.innerHTML = `
-    <section class="view active${p.bg ? ' has-bg' : ''}" data-theme="${s.id}">
-      ${p.bg ? `<div class="page-bg" style="background-image:url('${esc(p.bg)}')"></div><div class="page-bg-veil"></div>` : ''}
+    <section class="view active${p.bg ? ' has-bg' : ''}${p.bgMode === 'tile' ? ' bg-tiled' : ''}" data-theme="${s.id}">
+      ${p.bg ? `<div class="page-bg${p.bgMode === 'tile' ? ' page-bg-tile' : ''}" style="background-image:url('${esc(p.bg)}')"></div><div class="page-bg-veil"></div>` : ''}
       <div class="wrap">
       <div class="crumbs">
         <a href="#/">Home</a><span class="sep">/</span>
