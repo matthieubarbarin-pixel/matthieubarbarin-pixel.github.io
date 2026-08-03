@@ -518,16 +518,41 @@ header.bar{
 @media(max-width:600px){ .fragwall{ columns:2 160px; column-gap:24px; } }
 
 /* VIVID — horizontal filmstrip, photos shown whole in their native format (cheese vivid dreams) */
-.aero-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.6px; color:var(--encre-doux); margin:0 0 22px; display:inline-flex; align-items:center; gap:8px; }
+.aero-note{ font-family:var(--mono); font-size:.84rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--tang-d); margin:0 0 16px; display:inline-flex; align-items:center; gap:10px; }
+.aero-note .aero-arrow{ animation:aeroarrow 1.3s ease-in-out infinite; }
+@keyframes aeroarrow{ 0%,100%{ transform:translateX(0); opacity:.55 } 50%{ transform:translateX(7px); opacity:1 } }
+.aero-wrap{ position:relative; }
+/* the film strip */
 .aero-track{
-  display:flex; align-items:center; gap:26px;
+  display:flex; align-items:center; gap:22px;
   overflow-x:auto; overflow-y:hidden;
-  padding:32px 26px 34px; margin:0 -26px;
+  padding:38px 26px 40px; margin:0 -26px;
   scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
-  background:var(--encre);
+  background-color:var(--encre);
+  background-image:
+    repeating-linear-gradient(90deg, #d3ccbc 0 15px, rgba(0,0,0,0) 15px 34px),
+    repeating-linear-gradient(90deg, #d3ccbc 0 15px, rgba(0,0,0,0) 15px 34px);
+  background-repeat:repeat-x, repeat-x;
+  background-size:34px 14px, 34px 14px;
+  background-position:left 0 top 11px, left 0 bottom 11px;
   border-top:2px solid var(--encre); border-bottom:2px solid var(--encre);
-  scrollbar-color:var(--encre-pale) transparent;
 }
+/* obvious horizontal scrollbar */
+.aero-track{ scrollbar-color:var(--tang) rgba(0,0,0,.3); scrollbar-width:auto; }
+.aero-track::-webkit-scrollbar{ height:12px; }
+.aero-track::-webkit-scrollbar-track{ background:rgba(0,0,0,.28); }
+.aero-track::-webkit-scrollbar-thumb{ background:var(--tang); border-radius:8px; }
+/* right-edge fade + pulsing arrow: "there's more →" (fades once you scroll) */
+.aero-wrap::after{ content:""; position:absolute; top:0; bottom:0; right:-26px; width:96px; pointer-events:none; z-index:2;
+  background:linear-gradient(90deg, rgba(20,17,22,0), rgba(20,17,22,.6)); transition:opacity .4s; }
+.aero-wrap.scrolled::after{ opacity:0; }
+.aero-nudge{ position:absolute; top:50%; right:6px; transform:translateY(-50%); z-index:3; pointer-events:none;
+  width:56px; height:56px; border-radius:50%; background:var(--tang); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:1.7rem; line-height:1;
+  box-shadow:0 6px 16px rgba(0,0,0,.5); animation:aeronudge 1.4s ease-in-out infinite; }
+@keyframes aeronudge{ 0%,100%{ transform:translateY(-50%) translateX(0); opacity:.9 } 50%{ transform:translateY(-50%) translateX(7px); opacity:1 } }
+.aero-wrap.scrolled .aero-nudge{ opacity:0; pointer-events:none; transition:opacity .4s; }
+@media (prefers-reduced-motion: reduce){ .aero-note .aero-arrow, .aero-nudge{ animation:none; } }
 .aero-shot{
   flex:0 0 auto; scroll-snap-align:center;
   height:min(66vh,560px);
@@ -1184,6 +1209,8 @@ our anemic smiles in a tangent` }
         },
         {
           id: "late-lights",
+          bg: "photos/latemisc/bg-kaleido.jpg",
+          bgMode: "tile",
           title: "late lights misc of the ego",
           lower: true,
           featured: true,
@@ -1414,6 +1441,8 @@ our anemic smiles in a tangent` }
         },
         {
           id: "bajo",
+          bg: "photos/bajo/bg-kaleido.jpg",
+          bgMode: "tile",
           title: "Bajo's edges",
           brutal: true,
           kind: "Photo series",
@@ -1465,6 +1494,8 @@ our anemic smiles in a tangent` }
         },
         {
           id: "more-buoys",
+          bg: "photos/morebuoys/bg-kaleido.jpg",
+          bgMode: "tile",
           title: "more buoys",
           lower: true,
           kind: "Photo series",
@@ -1867,8 +1898,11 @@ function renderProject(s, p){
       <figure class="aero-shot" onclick="zoom('${esc(ph.src)}')">
         <img src="${esc(ph.src)}" alt="" loading="lazy">
       </figure>`).join('');
-    body = `<p class="aero-note">scroll sideways &rarr;</p>
-      <div class="aero-track">${shots}</div>`;
+    body = `<p class="aero-note">drag / scroll sideways <span class="aero-arrow">&rarr;&rarr;&rarr;</span></p>
+      <div class="aero-wrap">
+        <div class="aero-track" onscroll="this.closest('.aero-wrap').classList.add('scrolled')">${shots}</div>
+        <span class="aero-nudge" aria-hidden="true">&rarr;</span>
+      </div>`;
   } else if(p.type === 'route'){
     const pad = n => String(n).padStart(2,'0');
     const total = p.photos.length;
