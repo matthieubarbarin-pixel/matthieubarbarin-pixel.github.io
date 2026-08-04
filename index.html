@@ -576,6 +576,18 @@ header.bar{
 .aero-shot img{ height:100%; width:auto; display:block; }   /* native aspect ratio, no crop, no zoom */
 .aero-shot:hover{ transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,.6); }
 @media(max-width:600px){ .aero-shot{ height:56vh; } }
+/* free zine download */
+.zine-dl{ margin:36px auto 4px; max-width:560px; display:flex; align-items:center; gap:22px; flex-wrap:wrap; justify-content:center;
+  padding:22px 26px; border:1.5px solid rgba(255,255,255,.16); border-radius:16px; background:rgba(20,16,28,.42); backdrop-filter:blur(3px); }
+.zine-dl-txt{ flex:1 1 220px; min-width:200px; }
+.zine-dl-kind{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.22em; font-size:.68rem; color:var(--tang); margin:0 0 5px; }
+.zine-dl-title{ margin:0; font-size:.98rem; line-height:1.4; color:rgba(255,251,246,.9); }
+.zine-dl-btn{ flex:0 0 auto; display:inline-flex; align-items:center; gap:8px; text-decoration:none; white-space:nowrap;
+  font-family:var(--mono); font-size:.92rem; letter-spacing:.03em; color:#fff; background:var(--tang);
+  padding:13px 22px; border-radius:999px; box-shadow:0 6px 18px rgba(0,0,0,.4); transition:transform .18s, box-shadow .18s; }
+.zine-dl-btn:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.5), 0 0 0 4px rgba(255,106,23,.25); }
+.zine-dl-btn:active{ transform:translateY(0) scale(.97); }
+@media(max-width:520px){ .zine-dl{ flex-direction:column; text-align:center; gap:16px; } }
 
 /* MADRAINS — madrid in the rain: photos strung together by droplets & red brick */
 .mad-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:#a8452f; margin:0 0 26px; display:inline-flex; gap:8px; align-items:center; }
@@ -1236,6 +1248,7 @@ our anemic smiles in a tangent` }
           subtitle: "london, on film",
           lead: "cheese before bed, and the city comes back in cuts — no thread, just contrasts. scroll sideways.",
           type: "vivid",
+          download: "fanzine-cheese-vivid-dreams.pdf",
           bg: "photos/cheese/bg-kaleido.jpg",
           bgMode: "tile",
           photos: [
@@ -2008,11 +2021,19 @@ function renderProject(s, p){
       <figure class="aero-shot" onclick="zoom('${esc(ph.src)}')">
         <img src="${esc(ph.src)}" alt="" loading="lazy">
       </figure>`).join('');
+    const zineDl = p.download ? `
+      <div class="zine-dl">
+        <div class="zine-dl-txt">
+          <p class="zine-dl-kind">free zine</p>
+          <p class="zine-dl-title">the full series as an a5 booklet — yours to keep.</p>
+        </div>
+        <a class="zine-dl-btn" href="${esc(p.download)}" download>&#8595; download pdf</a>
+      </div>` : '';
     body = `<p class="aero-note">tap the arrow, drag, or scroll sideways <span class="aero-arrow">&rarr;&rarr;&rarr;</span></p>
       <div class="aero-wrap">
         <div class="aero-track" onscroll="aeroScroll(this)">${shots}</div>
         <button class="aero-nudge" type="button" onclick="aeroNext(this)" aria-label="next photo">&rarr;</button>
-      </div>`;
+      </div>${zineDl}`;
   } else if(p.type === 'route'){
     const pad = n => String(n).padStart(2,'0');
     const total = p.photos.length;
