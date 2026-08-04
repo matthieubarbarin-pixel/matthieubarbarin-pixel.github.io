@@ -97,7 +97,22 @@ header.bar{
   padding:3px 2px; border-bottom:2px solid transparent; transition:.15s;
 }
 .bar nav a:hover{ color:var(--encre); border-color:var(--tang); }
-@media(max-width:600px){ .bar nav{ display:none; } }
+/* hamburger toggle — hidden on desktop, drives the mobile menu */
+.nav-toggle{ display:none; flex-direction:column; justify-content:center; gap:5px; width:40px; height:34px;
+  padding:0 8px; background:none; border:none; cursor:pointer; }
+.nav-toggle span{ display:block; height:2.5px; width:100%; background:var(--encre); border-radius:2px; transition:transform .25s, opacity .2s; }
+.bar.menu-open .nav-toggle span:nth-child(1){ transform:translateY(7.5px) rotate(45deg); }
+.bar.menu-open .nav-toggle span:nth-child(2){ opacity:0; }
+.bar.menu-open .nav-toggle span:nth-child(3){ transform:translateY(-7.5px) rotate(-45deg); }
+@media(max-width:600px){
+  .nav-toggle{ display:flex; }
+  .bar .wrap{ flex-wrap:wrap; }
+  .bar nav{ order:3; flex-basis:100%; display:none; flex-direction:column; align-items:flex-start;
+    margin-top:12px; padding-top:10px; border-top:1.5px solid var(--encre-doux); }
+  .bar.menu-open nav{ display:flex; }
+  .bar nav a{ margin-left:0; width:100%; padding:11px 2px; font-size:.92rem; border-bottom:1px solid rgba(0,0,0,.06); }
+  .bar nav a:last-child{ border-bottom:none; }
+}
 
 /* =================================================================
    VIEWS
@@ -608,11 +623,19 @@ header.bar{
   font-family:var(--mono); font-size:.9rem; letter-spacing:.05em; }
 .zv-close:hover{ color:#fff; }
 .zv-bar{ position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px; }
-.zv-count{ font-family:var(--mono); font-size:.82rem; letter-spacing:.14em; color:rgba(255,251,246,.7); }
+.zv-count{ font-family:var(--mono); font-size:.82rem; letter-spacing:.14em; color:rgba(255,251,246,.7); white-space:nowrap; }
 .zv-dl{ font-family:var(--mono); font-size:.82rem; letter-spacing:.03em; text-decoration:none; color:#fff; background:var(--tang);
-  padding:9px 16px; border-radius:999px; box-shadow:0 5px 14px rgba(0,0,0,.4); }
+  padding:9px 16px; border-radius:999px; box-shadow:0 5px 14px rgba(0,0,0,.4); white-space:nowrap; }
 .zv-dl:hover{ box-shadow:0 8px 20px rgba(0,0,0,.5), 0 0 0 3px rgba(255,106,23,.25); }
-@media(max-width:600px){ .zv-img{ max-width:86vw; } .zv-nav{ width:44px; height:44px; font-size:1.6rem; } .zv-stage{ height:74vh; } }
+@media(max-width:600px){
+  #zine-viewer{ padding:12px; }
+  .zv-img{ max-width:94vw; }
+  .zv-stage{ height:76vh; }
+  .zv-nav{ position:absolute; top:50%; transform:translateY(-50%); z-index:4; width:44px; height:44px; font-size:1.6rem;
+    background:rgba(0,0,0,.5); border-color:rgba(255,255,255,.55); }
+  .zv-prev{ left:8px; } .zv-next{ right:8px; }
+  .zv-close{ top:12px; right:14px; }
+}
 
 /* MADRAINS — madrid in the rain: photos strung together by droplets & red brick */
 .mad-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:#a8452f; margin:0 0 26px; display:inline-flex; gap:8px; align-items:center; }
@@ -792,6 +815,9 @@ footer em{ font-style:normal; color:var(--encre-doux); }
 <header class="bar">
   <div class="wrap">
     <a href="#/" class="brand">✦ Layers with no dead ends</a>
+    <button class="nav-toggle" type="button" aria-label="menu" aria-expanded="false" onclick="toggleMenu(this)">
+      <span></span><span></span><span></span>
+    </button>
     <nav>
       <a href="#/words">Poetry</a>
       <a href="#/images">Images</a>
@@ -2268,6 +2294,13 @@ window.zineShow = function(z, idx){ z.dataset.idx = idx;
 window.zineGo = function(btn, dir){ var z = btn.closest('.zine'); var n = +z.dataset.n;
   var idx = ((+z.dataset.idx) + dir + n) % n; zineShow(z, idx); };
 window.zineJump = function(btn, i){ zineShow(btn.closest('.zine'), i); };
+
+// Mobile menu: the hamburger opens/closes the nav; picking a destination closes it.
+window.toggleMenu = function(btn){ var bar = btn.closest('.bar');
+  var open = bar.classList.toggle('menu-open'); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); };
+(function(){ var nav = document.querySelector('.bar nav'); if(!nav) return;
+  nav.addEventListener('click', function(e){ if(e.target.closest('a')){ var bar = nav.closest('.bar');
+    bar.classList.remove('menu-open'); var t = bar.querySelector('.nav-toggle'); if(t) t.setAttribute('aria-expanded','false'); } }); })();
 
 window.addEventListener('hashchange', render);
 render();
