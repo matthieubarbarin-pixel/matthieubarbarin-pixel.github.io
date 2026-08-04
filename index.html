@@ -782,6 +782,7 @@ const SITE = {
     /* ============================ LAYER 1 ============================ */
     {
       id: "words",
+      plainBg: true,
       layer: "Layer i",
       label: "Poetry",
       tagline: "Collections, fanzines & verse",
@@ -1612,6 +1613,7 @@ our anemic smiles in a tangent` }
     },
     {
       id: "sounds",
+      plainBg: true,
       layer: "Layer iii",
       label: "Playlists",
       tagline: "Playlists always tell a story",
@@ -1726,6 +1728,7 @@ function renderShop(){
 }
 
 function renderAbout(){
+  document.body.classList.add('plain-bg');
   app.innerHTML = `
     <section class="view active"><div class="wrap">
       <div class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span class="here">About</span></div>
