@@ -289,6 +289,13 @@ header.bar{
 [data-theme="images"] .pcard h3{ padding:0 4px; }
 [data-theme="images"] .pcard p,[data-theme="images"] .pcard .count{ padding:0 4px; }
 [data-theme="images"] .kind,[data-theme="images"] .crumbs .here{ color:var(--tang-d); }
+/* twin (sister) series — a medium, aligned pair */
+.twin-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:32px; margin-bottom:46px; align-items:start; }
+[data-theme="images"] .twin-grid .pcard{ transform:none; }
+[data-theme="images"] .twin-grid .pcard:nth-child(1){ box-shadow:7px 7px 0 var(--cyan); }
+[data-theme="images"] .twin-grid .pcard:nth-child(2){ box-shadow:7px 7px 0 var(--tang); }
+[data-theme="images"] .twin-grid .pcard:hover{ transform:translate(3px,3px); }
+@media(max-width:640px){ .twin-grid{ grid-template-columns:1fr; } }
 
 /* ================= PROJECT (deepest layer) ==================== */
 /* Spotify embeds */
@@ -1239,6 +1246,7 @@ our anemic smiles in a tangent` }
           bgMode: "tile",
           title: "late lights misc of the ego",
           lower: true,
+          twin: true,
           thumb: "photos/latemisc/lm01.jpg",
           kind: "Photo series",
           subtitle: "you won't hunt me down",
@@ -1344,6 +1352,7 @@ our anemic smiles in a tangent` }
           id: "knuckles",
           title: "What to do with knuckles?",
           lower: true,
+          twin: true,
           bg: "photos/knuckles/bg-kaleido.jpg",
           bgMode: "tile",
           kind: "Photo series",
@@ -1750,10 +1759,12 @@ function renderSection(s){
   };
 
   const featured = s.projects.filter(p => p.featured);
-  const rest = s.projects.filter(p => !p.featured);
+  const twins = s.projects.filter(p => p.twin && !p.featured);
+  const rest = s.projects.filter(p => !p.featured && !p.twin);
   let content = '';
   if(featured.length) content += `<div class="feat-grid">${featured.map(featCard).join('')}</div>`;
-  if(rest.length) content += `${featured.length ? `<p class="more-label">more to wander</p>` : ''}<div class="projects">${rest.map(normalCard).join('')}</div>`;
+  if(twins.length) content += `<div class="twin-grid">${twins.map(normalCard).join('')}</div>`;
+  if(rest.length) content += `${(featured.length || twins.length) ? `<p class="more-label">more to wander</p>` : ''}<div class="projects">${rest.map(normalCard).join('')}</div>`;
 
   app.innerHTML = `
     <section class="view active" data-theme="${s.id}"><div class="wrap">
