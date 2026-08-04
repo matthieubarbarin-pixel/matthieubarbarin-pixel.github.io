@@ -1247,7 +1247,7 @@ our anemic smiles in a tangent` }
           title: "late lights misc of the ego",
           lower: true,
           twin: true,
-          thumb: "photos/latemisc/lm01.jpg",
+          thumb: "photos/latemisc/lm05.jpg",
           kind: "Photo series",
           subtitle: "you won't hunt me down",
           lead: "",
@@ -1329,7 +1329,6 @@ our anemic smiles in a tangent` }
             { src: "photos/latemisc/lm53.jpg" },
             { src: "photos/latemisc/lm61.jpg" },
             { src: "photos/latemisc/lm05.jpg" },
-            { src: "photos/latemisc/lm79.jpg" },
             { src: "photos/latemisc/lm72.jpg" },
             { src: "photos/latemisc/lm18.jpg" },
             { src: "photos/latemisc/lm19.jpg" },
@@ -1728,7 +1727,7 @@ function renderHome(){
 function renderSection(s){
   if(s.plainBg) document.body.classList.add('plain-bg');
   const normalCard = p => {
-    const thumb = p.photos && p.photos.find(x => x.src);
+    const thumb = p.thumb ? { src: p.thumb } : (p.photos && p.photos.find(x => x.src));
     const cover = s.id === 'images' ? `<div class="cover">${thumb ? `<img src="${esc(thumb.src)}" alt="" loading="lazy">` : ''}</div>` : '';
     return `
       <a class="pcard" href="#/${s.id}/${p.id}">
