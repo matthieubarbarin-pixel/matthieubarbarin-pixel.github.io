@@ -664,6 +664,9 @@ header.bar{
 .shop-body p{ font-family:var(--mono); font-size:.82rem; line-height:1.6; color:var(--encre-doux); flex:1; }
 .shop-soon{ margin-top:14px; align-self:flex-start; font-family:var(--mono); font-size:.66rem; text-transform:uppercase; letter-spacing:1.5px;
   color:var(--tang-d); border:2px dashed var(--tang); border-radius:20px; padding:4px 12px; }
+.shop-soon-wrap{ padding:20px 0 70px; }
+.shop-soon-big{ font-family:var(--display); font-weight:700; text-transform:lowercase; font-size:clamp(4.5rem,17vw,10rem); line-height:.85; letter-spacing:-3px; color:var(--encre); margin:0; }
+.shop-soon-sub{ font-family:var(--mono); font-size:.92rem; color:var(--encre-pale); margin-top:20px; }
 
 /* About me */
 .bar nav a.nav-about{ color:var(--tang-d); }
@@ -1710,37 +1713,15 @@ function render(){
 
 function renderShop(){
   document.body.classList.add('plain-bg');
-  const products = [
-    { img:'photos/shop/cap.jpg', kind:'Headwear', name:'Embroidered cap', desc:'Your favourite line, embroidered — pick from 11 quotes, in black or red.' },
-    { img:'photos/shop/mug.jpg', kind:'Ceramic', name:'“umbrella” mug', desc:'My original drawing, cut out on white — with “yscycm” tiny on the back.' },
-    { img:'photos/shop/calendar.jpg', kind:'Wall calendar', name:'2027 calendar', desc:'Twelve photographs from Between Comets and Roots, one per month.' },
-    { img:'photos/shop/postcards-bcar.jpg', kind:'Prints', name:'Postcards · between comets and roots', desc:'The twenty photos, each captioned with its poem title.' },
-    { img:'photos/shop/postcards-custom.jpg', kind:'Print', name:'Pick-a-photo postcard', desc:'Any photo from the series (except cheese), printed clean — no caption.' },
-    { img:'photos/shop/zine.jpg', kind:'Photo zine', name:'Fanzine A5 · cheese vivid dreams', desc:'A little dreamy photo book — 17 pages, the whole london series.' }
-  ];
-  const cards = products.map(p => `
-    <article class="shop-card">
-      <div class="shop-cover"><img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy"></div>
-      <div class="shop-body">
-        <span class="tag">${esc(p.kind)}</span>
-        <h3 class="lc">${esc(p.name)}</h3>
-        <p>${esc(p.desc)}</p>
-        <span class="shop-soon">soon &middot; on order</span>
-      </div>
-    </article>`).join('');
   app.innerHTML = `
     <section class="view active" data-theme="sounds"><div class="wrap">
       <div class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span class="here">Shop</span></div>
-      <div class="head">
-        <p class="kind">Layer iv</p>
-        <h1>Shop</h1>
-        <p>Small things made from my layers — printed only when you order, then sent to you.</p>
+      <div class="head"><p class="kind">Layer iv</p><h1>Shop</h1></div>
+      <div class="shop-soon-wrap">
+        <p class="shop-soon-big">soon</p>
+        <p class="shop-soon-sub">something is being made here — come back a little later.</p>
       </div>
-      <div class="shop-note">
-        <b>The shop is opening very soon.</b> Made-to-order (no stock, no waste), paid with PayPal, shipped straight to you — and <b>every euro of profit goes to charity</b>.
-      </div>
-      <div class="shop-grid">${cards}</div>
-      <div class="onward"><a href="#/">&larr; back home</a><a class="next" href="#/about">about me &rarr;</a></div>
+      <div class="onward"><a href="#/">&larr; back home</a></div>
     </div></section>`;
 }
 
