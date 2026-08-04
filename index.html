@@ -645,6 +645,26 @@ header.bar{
 .nightwrap .shot:hover{ transform:translateY(-4px); }
 .nightwrap .shot:hover img{ box-shadow:0 0 48px -2px rgba(255,224,170,.42), 0 22px 42px -16px rgba(0,0,0,.78); }
 
+/* Shop */
+.bar nav a.nav-shop{ color:var(--cyan-d); }
+.bar nav a.nav-shop:hover{ border-color:var(--tang); color:var(--encre); }
+.shop-note{ font-family:var(--mono); font-size:.86rem; line-height:1.6; color:var(--encre-doux);
+  border:2px solid var(--encre); border-left:6px solid var(--cyan); background:var(--card);
+  box-shadow:6px 6px 0 var(--tang); padding:16px 20px; margin:0 0 40px; max-width:760px; }
+.shop-note b{ color:var(--encre); }
+.shop-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:30px; }
+.shop-card{ border:2.5px solid var(--encre); background:var(--card); box-shadow:7px 7px 0 var(--cyan);
+  transition:transform .2s, box-shadow .2s; display:flex; flex-direction:column; }
+.shop-card:nth-child(even){ box-shadow:7px 7px 0 var(--tang); }
+.shop-card:hover{ transform:translate(3px,3px); box-shadow:3px 3px 0 var(--encre); }
+.shop-cover{ aspect-ratio:4/3; overflow:hidden; border-bottom:2.5px solid var(--encre); background:#0e0c12; }
+.shop-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+.shop-body{ padding:18px 20px 22px; display:flex; flex-direction:column; flex:1; }
+.shop-body h3{ margin:8px 0 6px; }
+.shop-body p{ font-family:var(--mono); font-size:.82rem; line-height:1.6; color:var(--encre-doux); flex:1; }
+.shop-soon{ margin-top:14px; align-self:flex-start; font-family:var(--mono); font-size:.66rem; text-transform:uppercase; letter-spacing:1.5px;
+  color:var(--tang-d); border:2px dashed var(--tang); border-radius:20px; padding:4px 12px; }
+
 /* About me */
 .bar nav a.nav-about{ color:var(--tang-d); }
 .bar nav a.nav-about:hover{ border-color:var(--cyan); color:var(--encre); }
@@ -736,6 +756,7 @@ footer em{ font-style:normal; color:var(--encre-doux); }
       <a href="#/words">Poetry</a>
       <a href="#/images">Images</a>
       <a href="#/sounds">Playlists</a>
+      <a href="#/shop" class="nav-shop">Shop</a>
       <a href="#/about" class="nav-about">About</a>
     </nav>
   </div>
@@ -1678,12 +1699,49 @@ function render(){
   document.body.classList.remove('plain-bg');
   if(parts.length === 0)      return renderHome();
   if(parts[0] === 'about')    return renderAbout();
+  if(parts[0] === 'shop')     return renderShop();
   const section = sectionById(parts[0]);
   if(!section)                return renderHome();
   if(parts.length === 1)      return renderSection(section);
   const project = projectById(section, parts[1]);
   if(!project)                return renderSection(section);
   return renderProject(section, project);
+}
+
+function renderShop(){
+  document.body.classList.add('plain-bg');
+  const products = [
+    { img:'photos/shop/cap.jpg', kind:'Headwear', name:'Embroidered cap', desc:'Your favourite line, embroidered — pick from 11 quotes, in black or red.' },
+    { img:'photos/shop/mug.jpg', kind:'Ceramic', name:'“umbrella” mug', desc:'My original drawing, cut out on white — with “yscycm” tiny on the back.' },
+    { img:'photos/shop/calendar.jpg', kind:'Wall calendar', name:'2027 calendar', desc:'Twelve photographs from Between Comets and Roots, one per month.' },
+    { img:'photos/shop/postcards-bcar.jpg', kind:'Prints', name:'Postcards · between comets and roots', desc:'The twenty photos, each captioned with its poem title.' },
+    { img:'photos/shop/postcards-custom.jpg', kind:'Print', name:'Pick-a-photo postcard', desc:'Any photo from the series (except cheese), printed clean — no caption.' },
+    { img:'photos/shop/zine.jpg', kind:'Photo zine', name:'Fanzine A5 · cheese vivid dreams', desc:'A little dreamy photo book — 17 pages, the whole london series.' }
+  ];
+  const cards = products.map(p => `
+    <article class="shop-card">
+      <div class="shop-cover"><img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy"></div>
+      <div class="shop-body">
+        <span class="tag">${esc(p.kind)}</span>
+        <h3 class="lc">${esc(p.name)}</h3>
+        <p>${esc(p.desc)}</p>
+        <span class="shop-soon">soon &middot; on order</span>
+      </div>
+    </article>`).join('');
+  app.innerHTML = `
+    <section class="view active" data-theme="sounds"><div class="wrap">
+      <div class="crumbs"><a href="#/">Home</a><span class="sep">/</span><span class="here">Shop</span></div>
+      <div class="head">
+        <p class="kind">Layer iv</p>
+        <h1>Shop</h1>
+        <p>Small things made from my layers — printed only when you order, then sent to you.</p>
+      </div>
+      <div class="shop-note">
+        <b>The shop is opening very soon.</b> Made-to-order (no stock, no waste), paid with PayPal, shipped straight to you — and <b>every euro of profit goes to charity</b>.
+      </div>
+      <div class="shop-grid">${cards}</div>
+      <div class="onward"><a href="#/">&larr; back home</a><a class="next" href="#/about">about me &rarr;</a></div>
+    </div></section>`;
 }
 
 function renderAbout(){
