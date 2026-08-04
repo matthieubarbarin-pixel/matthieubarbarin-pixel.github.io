@@ -553,12 +553,14 @@ header.bar{
 .aero-wrap::after{ content:""; position:absolute; top:0; bottom:0; right:-26px; width:96px; pointer-events:none; z-index:2;
   background:linear-gradient(90deg, rgba(20,17,22,0), rgba(20,17,22,.6)); transition:opacity .4s; }
 .aero-wrap.scrolled::after{ opacity:0; }
-.aero-nudge{ position:absolute; top:50%; right:6px; transform:translateY(-50%); z-index:3; pointer-events:none;
-  width:56px; height:56px; border-radius:50%; background:var(--tang); color:#fff;
+.aero-nudge{ position:absolute; top:50%; right:6px; transform:translateY(-50%); z-index:3; pointer-events:auto; cursor:pointer;
+  width:56px; height:56px; border:2px solid rgba(255,255,255,.85); border-radius:50%; padding:0; background:var(--tang); color:#fff;
   display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:1.7rem; line-height:1;
-  box-shadow:0 6px 16px rgba(0,0,0,.5); animation:aeronudge 1.4s ease-in-out infinite; }
-@keyframes aeronudge{ 0%,100%{ transform:translateY(-50%) translateX(0); opacity:.9 } 50%{ transform:translateY(-50%) translateX(7px); opacity:1 } }
-.aero-wrap.scrolled .aero-nudge{ opacity:0; pointer-events:none; transition:opacity .4s; }
+  box-shadow:0 6px 16px rgba(0,0,0,.5); animation:aeronudge 1.4s ease-in-out infinite; transition:opacity .4s, box-shadow .2s; }
+@keyframes aeronudge{ 0%,100%{ transform:translateY(-50%) translateX(0); opacity:.92 } 50%{ transform:translateY(-50%) translateX(7px); opacity:1 } }
+.aero-nudge:hover{ box-shadow:0 6px 20px rgba(0,0,0,.6), 0 0 0 4px rgba(255,106,23,.3); }
+.aero-nudge:active{ animation:none; transform:translateY(-50%) translateX(4px) scale(.94); }
+.aero-wrap.at-end .aero-nudge{ opacity:0; pointer-events:none; animation:none; }
 @media (prefers-reduced-motion: reduce){ .aero-note .aero-arrow, .aero-nudge{ animation:none; } }
 .aero-shot{
   flex:0 0 auto; scroll-snap-align:center;
@@ -1209,7 +1211,6 @@ our anemic smiles in a tangent` }
           bgMode: "tile",
           photos: [
             { src: "photos/cheese/c19.jpg" },
-            { src: "photos/cheese/c03.jpg" },
             { src: "photos/cheese/c01.jpg" },
             { src: "photos/cheese/c23.jpg" },
             { src: "photos/cheese/c11.jpg" },
@@ -1222,6 +1223,7 @@ our anemic smiles in a tangent` }
             { src: "photos/cheese/c26.jpg" },
             { src: "photos/cheese/c15.jpg" },
             { src: "photos/cheese/c24.jpg" },
+            { src: "photos/cheese/c32.jpg" },
             { src: "photos/cheese/c07.jpg" },
             { src: "photos/cheese/c31.jpg" },
             { src: "photos/cheese/c17.jpg" },
@@ -1237,8 +1239,9 @@ our anemic smiles in a tangent` }
             { src: "photos/cheese/c14.jpg" },
             { src: "photos/cheese/c12.jpg" },
             { src: "photos/cheese/c18.jpg" },
+            { src: "photos/cheese/c03.jpg" },
             { src: "photos/cheese/c16.jpg" }
-                    ]
+          ]
         },
         {
           id: "late-lights",
@@ -1962,10 +1965,10 @@ function renderProject(s, p){
       <figure class="aero-shot" onclick="zoom('${esc(ph.src)}')">
         <img src="${esc(ph.src)}" alt="" loading="lazy">
       </figure>`).join('');
-    body = `<p class="aero-note">drag / scroll sideways <span class="aero-arrow">&rarr;&rarr;&rarr;</span></p>
+    body = `<p class="aero-note">tap the arrow, drag, or scroll sideways <span class="aero-arrow">&rarr;&rarr;&rarr;</span></p>
       <div class="aero-wrap">
-        <div class="aero-track" onscroll="this.closest('.aero-wrap').classList.add('scrolled')">${shots}</div>
-        <span class="aero-nudge" aria-hidden="true">&rarr;</span>
+        <div class="aero-track" onscroll="aeroScroll(this)">${shots}</div>
+        <button class="aero-nudge" type="button" onclick="aeroNext(this)" aria-label="next photo">&rarr;</button>
       </div>`;
   } else if(p.type === 'route'){
     const pad = n => String(n).padStart(2,'0');
@@ -2103,6 +2106,25 @@ window.zoom = function(src){
 // Cast (buoys): tap a floating character to jump to its poem and flash it.
 window.castJump = function(el){ var t = document.getElementById(el.dataset.target); if(!t) return;
   t.scrollIntoView({behavior:'smooth', block:'center'}); t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); };
+// Vivid filmstrip: the red arrow advances to the next photo; state updates keep it hidden at the end.
+window.aeroNext = function(btn){
+  var wrap = btn.closest('.aero-wrap'); if(!wrap) return;
+  var track = wrap.querySelector('.aero-track'); if(!track) return;
+  var tLeft = track.getBoundingClientRect().left, sl = track.scrollLeft, pad = 26;
+  var shots = [].slice.call(track.querySelectorAll('.aero-shot'));
+  var target = null;
+  for(var i=0;i<shots.length;i++){
+    var contentLeft = shots[i].getBoundingClientRect().left - tLeft + sl; // left within track content
+    if(contentLeft - pad > sl + 8){ target = contentLeft - pad; break; }
+  }
+  if(target === null) target = track.scrollWidth;
+  track.scrollTo({ left: target, behavior:'smooth' });
+};
+window.aeroScroll = function(track){
+  var wrap = track.closest('.aero-wrap'); if(!wrap) return;
+  wrap.classList.add('scrolled');
+  wrap.classList.toggle('at-end', track.scrollLeft + track.clientWidth >= track.scrollWidth - 6);
+};
 // Pearls: a poem opens inside its pearl — only one at a time.
 window.oysterOpen = function(el){ var id = el.dataset.target;
   document.querySelectorAll('.oyster-panel').forEach(function(p){ p.classList.toggle('open', p.id === id); });
