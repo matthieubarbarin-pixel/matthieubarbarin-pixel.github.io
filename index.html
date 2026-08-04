@@ -602,6 +602,29 @@ header.bar{
   padding:13px 22px; border-radius:999px; box-shadow:0 6px 18px rgba(0,0,0,.4); transition:transform .18s, box-shadow .18s; }
 .zine-dl-btn:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.5), 0 0 0 4px rgba(255,106,23,.25); }
 .zine-dl-btn:active{ transform:translateY(0) scale(.97); }
+.zine-block{ margin:36px auto 4px; max-width:600px; text-align:center;
+  padding:24px 22px; border:1.5px solid rgba(255,255,255,.16); border-radius:16px; background:rgba(20,16,28,.42); backdrop-filter:blur(3px); }
+.zine-block .zine-dl-kind{ margin:0 0 6px; }
+.zine-block .zine-dl-title{ margin:0 0 4px; }
+.zine-inline{ margin:16px 0 12px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.zfi-frame{ display:flex; align-items:center; justify-content:center; gap:12px; width:100%; }
+.zfi-stage{ flex:0 1 auto; cursor:pointer; line-height:0; }
+.zfi-img{ max-height:min(62vh,520px); max-width:100%; width:auto; border-radius:3px; background:#111;
+  box-shadow:0 14px 40px rgba(0,0,0,.5); display:block; }
+.zfi-in{ animation:zvfade .28s ease; }
+.zfi-nav{ flex:0 0 auto; width:46px; height:46px; border-radius:50%; border:1.5px solid rgba(255,255,255,.32);
+  background:rgba(255,255,255,.06); color:#fff; font-size:1.7rem; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:background .18s, border-color .18s; }
+.zfi-nav:hover{ background:var(--tang); border-color:var(--tang); }
+.zfi-count{ font-family:var(--mono); font-size:.8rem; letter-spacing:.14em; color:rgba(255,251,246,.65); }
+@media(max-width:520px){
+  .zine-block{ padding:18px 14px; }
+  .zfi-frame{ position:relative; gap:0; }
+  .zfi-nav{ position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:40px; height:40px; font-size:1.5rem;
+    background:rgba(0,0,0,.5); border-color:rgba(255,255,255,.5); }
+  .zfi-prev{ left:6px; } .zfi-next{ right:6px; }
+  .zfi-img{ max-height:64vh; }
+}
 .zine-dl-actions{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
 .zine-dl-btn.ghost{ background:transparent; color:rgba(255,251,246,.92); border:1.5px solid rgba(255,255,255,.4); box-shadow:none; cursor:pointer; }
 .zine-dl-btn.ghost:hover{ border-color:var(--tang); color:#fff; box-shadow:0 0 0 4px rgba(255,106,23,.14); }
@@ -2074,13 +2097,22 @@ function renderProject(s, p){
         <img src="${esc(ph.src)}" alt="" loading="lazy">
       </figure>`).join('');
     const zineDl = p.download ? `
-      <div class="zine-dl">
-        <div class="zine-dl-txt">
-          <p class="zine-dl-kind">free zine</p>
-          <p class="zine-dl-title">the full series as an a5 booklet — yours to keep.</p>
-        </div>
+      <div class="zine-block">
+        <p class="zine-dl-kind">free zine</p>
+        <p class="zine-dl-title">the full series as an a5 booklet — flip through it here, then keep it.</p>
+        ${p.preview ? `
+        <div class="zine-inline" data-dir="${esc(p.preview.dir)}" data-count="${p.preview.count}" data-idx="0">
+          <div class="zfi-frame">
+            <button class="zfi-nav zfi-prev" type="button" onclick="zineFlip(this,-1)" aria-label="previous page">&#8249;</button>
+            <div class="zfi-stage" onclick="zineFlipTap(this,event)">
+              <img class="zfi-img" src="${esc(p.preview.dir)}/p00.jpg" alt="fanzine page" onload="zinePreload(this)">
+            </div>
+            <button class="zfi-nav zfi-next" type="button" onclick="zineFlip(this,1)" aria-label="next page">&#8250;</button>
+          </div>
+          <span class="zfi-count">1 / ${p.preview.count}</span>
+        </div>` : ''}
         <div class="zine-dl-actions">
-          ${p.preview ? `<button class="zine-dl-btn ghost" type="button" onclick="zineOpen('${esc(p.preview.dir)}',${p.preview.count},'${esc(p.download)}')">&#9744; flip through</button>` : ''}
+          ${p.preview ? `<button class="zine-dl-btn ghost" type="button" onclick="zineOpen('${esc(p.preview.dir)}',${p.preview.count},'${esc(p.download)}')">&#10530; fullscreen</button>` : ''}
           <a class="zine-dl-btn" href="${esc(p.download)}" download>&#8595; download pdf</a>
         </div>
       </div>` : '';
@@ -2259,6 +2291,20 @@ window.zineOpen = function(dir, count, pdf){
   pages.forEach(function(s){ var im = new Image(); im.src = s; }); // preload
   v.classList.add('on'); document.body.style.overflow='hidden';
 };
+// Inline zine flipbook: leaf through the booklet right on the page.
+window.zineFlip = function(el, dir){
+  var box = el.closest('.zine-inline'); if(!box) return;
+  var n = +box.dataset.count, i = ((+box.dataset.idx) + dir + n) % n; box.dataset.idx = i;
+  var img = box.querySelector('.zfi-img');
+  img.classList.remove('zfi-in'); void img.offsetWidth;
+  img.src = box.dataset.dir + '/p' + String(i).padStart(2,'0') + '.jpg'; img.classList.add('zfi-in');
+  box.querySelector('.zfi-count').textContent = (i+1) + ' / ' + n;
+};
+window.zineFlipTap = function(stage, e){ var r = stage.getBoundingClientRect();
+  zineFlip(stage, (e.clientX - r.left > r.width/2) ? 1 : -1); };
+window.zinePreload = function(img){ var box = img.closest('.zine-inline'); if(!box || box._pre) return; box._pre = 1;
+  var n = +box.dataset.count, d = box.dataset.dir;
+  for(var i=0;i<n;i++){ var im = new Image(); im.src = d + '/p' + String(i).padStart(2,'0') + '.jpg'; } };
 // Cast (buoys): tap a floating character to jump to its poem and flash it.
 window.castJump = function(el){ var t = document.getElementById(el.dataset.target); if(!t) return;
   t.scrollIntoView({behavior:'smooth', block:'center'}); t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); };
