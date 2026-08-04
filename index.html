@@ -564,6 +564,30 @@ header.bar{
 .aero-shot:hover{ transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,.6); }
 @media(max-width:600px){ .aero-shot{ height:56vh; } }
 
+/* MADRAINS — madrid in the rain: photos strung together by droplets & red brick */
+.mad-note{ font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:1.5px; color:#a8452f; margin:0 0 26px; display:inline-flex; gap:8px; align-items:center; }
+.madrains{ max-width:500px; margin:0 auto; display:flex; flex-direction:column; align-items:center; }
+.mad-photo{ margin:0; width:100%; background:var(--paper); padding:10px 10px 12px; border:2px solid var(--encre);
+  box-shadow:7px 7px 0 rgba(168,69,47,.5); transform:rotate(var(--r,0deg)); cursor:zoom-in; transition:transform .25s, box-shadow .25s; }
+.mad-photo img{ width:100%; display:block; }
+.mad-photo:hover{ transform:rotate(0deg) translateY(-3px); box-shadow:4px 4px 0 rgba(168,69,47,.75); }
+/* connector: a little red-brick ledge with trickling droplets */
+.rain-link{ position:relative; width:46px; height:84px; margin:2px auto; }
+.rain-link .brick{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:42px; height:32px; border:1.5px solid #7d2c1e; border-radius:2px;
+  background-color:#a8452f;
+  background-image:linear-gradient(#ecdfc9 0 2px, transparent 2px), linear-gradient(90deg,#ecdfc9 0 2px, transparent 2px);
+  background-size:100% 11px, 21px 11px;
+  box-shadow:2px 2px 0 rgba(0,0,0,.18); }
+.rain-link .drop{ position:absolute; left:50%; width:11px; height:15px; margin-left:-5px;
+  background:radial-gradient(circle at 36% 28%, #ffffff, #d0e0ec 55%, #9fbdd2);
+  border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; box-shadow:0 2px 4px rgba(0,0,0,.16);
+  animation:drip 2.4s ease-in infinite; }
+.rain-link .dr1{ top:36px; margin-left:-13px; animation-delay:0s; }
+.rain-link .dr2{ top:39px; margin-left:3px; animation-delay:.7s; }
+.rain-link .dr3{ top:42px; margin-left:-5px; animation-delay:1.35s; }
+@keyframes drip{ 0%{ transform:translateY(0); opacity:0 } 16%{ opacity:.95 } 78%{ opacity:.95 } 100%{ transform:translateY(30px); opacity:0 } }
+@media (prefers-reduced-motion: reduce){ .rain-link .drop{ animation:none; opacity:.9; } }
+
 /* ROUTE — the trip: photos as stops along a dotted trajectory (What to do with knuckles?) */
 .route{ position:relative; max-width:960px; margin:0 auto; padding:6px 0 30px; }
 .route-line{ position:absolute; left:50%; top:40px; bottom:40px; width:6px; transform:translateX(-50%); z-index:0;
@@ -1441,6 +1465,29 @@ our anemic smiles in a tangent` }
           ]
         },
         {
+          id: "madrains",
+          plainBg: true,
+          years: "2025",
+          title: "MADRAINS",
+          brutal: true,
+          kind: "Photo series",
+          subtitle: "madrid, in the rain",
+          lead: "",
+          type: "madrains",
+          photos: [
+            { src: "photos/madrains/m01.jpg" },
+            { src: "photos/madrains/m02.jpg" },
+            { src: "photos/madrains/m03.jpg" },
+            { src: "photos/madrains/m04.jpg" },
+            { src: "photos/madrains/m05.jpg" },
+            { src: "photos/madrains/m06.jpg" },
+            { src: "photos/madrains/m07.jpg" },
+            { src: "photos/madrains/m08.jpg" },
+            { src: "photos/madrains/m09.jpg" },
+            { src: "photos/madrains/m10.jpg" }
+          ]
+        },
+        {
           id: "bajo",
           bg: "photos/bajo/bg-kaleido.jpg",
           bgMode: "tile",
@@ -1731,7 +1778,7 @@ function countLabel(p){
   if(p.type === 'zine')    return (p.pieces?.length||0) + ' poems + photos';
   if(p.type === 'poems')   return (p.poems?.length||0) + (p.poems?.length===1?' poem':' poems');
   if(p.type === 'pearls')  return (p.pieces?.length||0) + ' / ' + (p.total||12) + ' poems · in progress';
-  if(p.type === 'photos' || p.type === 'city' || p.type === 'route' || p.type === 'fragments' || p.type === 'vivid')  return (p.photos?.length||0) + (p.photos?.length===1?' photo':' photos');
+  if(p.type === 'photos' || p.type === 'city' || p.type === 'route' || p.type === 'fragments' || p.type === 'vivid' || p.type === 'madrains')  return (p.photos?.length||0) + (p.photos?.length===1?' photo':' photos');
   return '';
 }
 
@@ -1895,6 +1942,14 @@ function renderProject(s, p){
         <figcaption>&#8226; frag. ${pad(i+1)}</figcaption>
       </figure>`).join('');
     body = `<p class="frag-note">fragments, articulated &middot; knuckles hold the pieces together</p><div class="fragwall">${cards}</div>`;
+  } else if(p.type === 'madrains'){
+    const cards = p.photos.map((ph,i) => {
+      const link = i < p.photos.length-1
+        ? `<div class="rain-link" aria-hidden="true"><span class="brick"></span><span class="drop dr1"></span><span class="drop dr2"></span><span class="drop dr3"></span></div>`
+        : '';
+      return `<figure class="mad-photo" style="--r:${(i % 2 ? 1.4 : -1.4)}deg" onclick="zoom('${esc(ph.src)}')"><img src="${esc(ph.src)}" alt="" loading="lazy"></figure>${link}`;
+    }).join('');
+    body = `<p class="mad-note">madrid, caught in the rain &middot; strung together by droplets &amp; red brick</p><div class="madrains">${cards}</div>`;
   } else if(p.type === 'vivid'){
     const shots = p.photos.map((ph) => `
       <figure class="aero-shot" onclick="zoom('${esc(ph.src)}')">
