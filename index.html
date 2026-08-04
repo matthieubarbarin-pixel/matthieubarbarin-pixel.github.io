@@ -505,7 +505,11 @@ header.bar{
 .frag img{ width:100%; display:block; filter:saturate(.8) contrast(.92) brightness(1.05) sepia(.12); }
 .frag{ cursor:zoom-in; }
 .shot{ cursor:zoom-in; }
-.flip-photo{ cursor:zoom-in; }
+.flip-photo{ cursor:pointer; }
+.flip-zoom{ position:absolute; top:9px; left:9px; z-index:3; width:34px; height:34px; border-radius:50%; border:none; cursor:zoom-in;
+  background:rgba(0,0,0,.5); color:#fff; font-size:.9rem; line-height:1; display:flex; align-items:center; justify-content:center;
+  transition:background .2s, transform .2s; }
+.flip-zoom:hover{ background:rgba(0,0,0,.78); transform:scale(1.1); }
 .zphoto{ cursor:zoom-in; }
 /* Lightbox */
 #lightbox{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center;
@@ -1352,6 +1356,7 @@ our anemic smiles in a tangent` }
         },
         {
           id: "knuckles",
+          thumb: "photos/knuckles/k30.jpg",
           title: "What to do with knuckles?",
           lower: true,
           twin: true,
@@ -1451,16 +1456,13 @@ our anemic smiles in a tangent` }
             { src: "photos/knuckles/k92.jpg" },
             { src: "photos/knuckles/k93.jpg" },
             { src: "photos/knuckles/k94.jpg" },
-            { src: "photos/knuckles/k95.jpg" },
             { src: "photos/knuckles/k96.jpg" },
-            { src: "photos/knuckles/k97.jpg" },
             { src: "photos/knuckles/k98.jpg" },
             { src: "photos/knuckles/k99.jpg" },
             { src: "photos/knuckles/k100.jpg" },
             { src: "photos/knuckles/k101.jpg" },
             { src: "photos/knuckles/k102.jpg" },
             { src: "photos/knuckles/k103.jpg" },
-            { src: "photos/knuckles/k104.jpg" },
             { src: "photos/knuckles/k105.jpg" },
             { src: "photos/knuckles/k106.jpg" },
             { src: "photos/knuckles/k107.jpg" },
@@ -1470,7 +1472,6 @@ our anemic smiles in a tangent` }
             { src: "photos/knuckles/k111.jpg" },
             { src: "photos/knuckles/k112.jpg" },
             { src: "photos/knuckles/k113.jpg" },
-            { src: "photos/knuckles/k114.jpg" },
             { src: "photos/knuckles/k115.jpg" },
             { src: "photos/knuckles/k116.jpg" }
           ]
@@ -1810,7 +1811,7 @@ function renderProject(s, p){
     const cover = p.cover ? `<img class="duet-cover" src="${esc(p.cover)}" alt="cover of ${esc(p.title)}">` : '';
     const tiles = p.pieces.map(pc => {
       const back = pc.photo
-        ? `<img class="flip-photo" src="${esc(pc.photo)}" alt="photograph for ${esc(pc.title)}" loading="lazy" onerror="imgFail(this)" onclick="event.stopPropagation(); zoom('${esc(pc.photo)}')">`
+        ? `<img class="flip-photo" src="${esc(pc.photo)}" alt="photograph for ${esc(pc.title)}" loading="lazy" onerror="imgFail(this)"><button class="flip-zoom" type="button" onclick="event.stopPropagation(); zoom('${esc(pc.photo)}')" aria-label="see larger">&#128269;</button>`
         : `<div class="flip-missing">photo to come</div>`;
       return `
       <div class="flip${pc.photo ? '' : ' nophoto'}" onclick="flip(this)">
@@ -1831,7 +1832,7 @@ function renderProject(s, p){
       </div>`;
     }).join('');
     const head = (p.cover || p.playlist) ? `<div class="duet-head">${cover}${p.playlist ? `<div class="duet-playlist">${p.playlist}</div>` : ''}</div>` : '';
-    body = `${head}<p class="duet-hint">tap a card to turn poem ↔ photo</p><div class="duet-grid">${tiles}</div>`;
+    body = `${head}<p class="duet-hint">tap a card to turn poem ↔ photo &middot; tap &#128269; to enlarge</p><div class="duet-grid">${tiles}</div>`;
   } else if(p.type === 'cast'){
     const pad = n => String(n).padStart(2,'0');
     const buoys = p.poems.map((pc,i) => `
