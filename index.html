@@ -668,10 +668,10 @@ header.bar{
 .dc-b{ justify-content:flex-end; padding-right:0; }
 .dc-b>img{ max-height:42vh; max-width:26vw; align-self:flex-start; margin-top:9vh; }
 .dc-b>img:last-child{ max-height:92vh; max-width:56vw; align-self:center; margin-top:0; }
-.dc-c{ justify-content:center; gap:4vw; padding:6vh 6vw 16vh; }
-.dc-c>img:first-child{ max-height:60vh; max-width:42vw; }
-.dc-c>img:nth-child(2):not(:last-child){ max-height:44vh; max-width:26vw; align-self:flex-end; }
-.dc-c>img:last-child{ max-height:82vh; max-width:50vw; margin-top:18vh; }
+.dc-c{ justify-content:center; align-items:flex-start; gap:3vw; padding:7vh 6vw 15vh; }
+.dc-c>img{ max-height:42vh; max-width:27vw; }
+.dc-c>img:nth-child(2):not(:last-child){ align-self:flex-end; margin-top:6vh; }
+.dc-c>img:last-child{ max-height:82vh; max-width:52vw; margin-top:15vh; align-self:flex-start; }
 .dusk-text{ min-height:86vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; padding:10vh 6vw; text-align:center; }
 .dusk-text>img{ max-height:54vh; max-width:80vw; width:auto; border-radius:2px; box-shadow:0 22px 60px rgba(0,0,0,.5); cursor:zoom-in; }
 .dusk-cap{ font-family:var(--mono); font-size:clamp(.95rem,2.2vw,1.35rem); letter-spacing:.03em; color:rgba(246,239,230,.92); max-width:24ch; margin:0; }
@@ -1387,17 +1387,17 @@ our anemic smiles in a tangent` }
             /* day — bright, warm, standing */
             { t:"cluster", src:["l2-05","l1-02","l1-10"] },
             { t:"cluster", src:["l2-08","l1-09","l1-08"] },
-            { t:"cluster", src:["l1-30","l2-06","l1-27"] },
-            { t:"cluster", src:["l4-03","l4-05","l1-13"] },
+            { t:"cluster", src:["l1-30","l1-27","l2-06"] },
+            { t:"cluster", src:["l4-03","l1-18","l1-13"] },
             { t:"full", src:"l3-14" },
             { t:"cluster", src:["l3-03","l4-07","l4-02"] },
             { t:"cluster", src:["l1-12","l1-28","l1-22"] },
             { t:"cluster", src:["l3-10","l1-20","l3-02"] },
             { t:"text", src:"l3-13", cap:"el millor estiu de la teva vida" },
-            { t:"cluster", src:["l4-10","l1-18"] },
+            { t:"cluster", src:["l4-10","l4-05"] },
             /* the sun dissolves */
             { t:"full", src:"l3-15" },
-            { t:"cluster", src:["l2-07","l4-09"] },
+            { t:"cluster", src:["l4-09","l2-07"] },
             { t:"full", src:"l2-02" },
             { t:"text", src:"l3-09", cap:"no se me quita el sabor de tu boca" },
             { t:"cluster", src:["l1-23","l1-14"] },
@@ -1405,7 +1405,7 @@ our anemic smiles in a tangent` }
             { t:"full", src:"l1-07" },
             { t:"cluster", src:["l3-04","l3-07","l4-14"] },
             { t:"full", src:"l1-16" },
-            { t:"cluster", src:["l1-06","l1-15","l1-17"] },
+            { t:"cluster", src:["l1-06","l1-17","l1-15"] },
             { t:"cluster", src:["l1-26","l1-21","l4-08"] },
             { t:"full", src:"l2-04" },
             { t:"cluster", src:["l3-08","l3-06","l2-03"] },
