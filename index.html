@@ -629,6 +629,42 @@ header.bar{
 .zine-dl-btn.ghost{ background:transparent; color:rgba(255,251,246,.92); border:1.5px solid rgba(255,255,255,.4); box-shadow:none; cursor:pointer; }
 .zine-dl-btn.ghost:hover{ border-color:var(--tang); color:#fff; box-shadow:0 0 0 4px rgba(255,106,23,.14); }
 @media(max-width:520px){ .zine-dl{ flex-direction:column; text-align:center; gap:16px; } }
+/* dusk — barcelona: a full-bleed scroll that dissolves from day into night */
+.dusk-view{ position:relative; }
+.dusk-sky{ position:fixed; inset:0; z-index:0; background:linear-gradient(180deg,#3a283a,#7a4a36); transition:background .18s linear; }
+.dusk-scenes{ position:relative; z-index:1; }
+.dusk-open{ position:relative; height:100vh; min-height:520px; overflow:hidden; }
+.dusk-open>img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.dusk-open-veil{ position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,4,10,.2) 0%,rgba(6,4,10,.12) 42%,rgba(6,4,10,.86) 100%); }
+.dusk-crumbs{ position:absolute; top:16px; left:22px; z-index:2; font-family:var(--mono); font-size:.72rem; letter-spacing:.08em; color:rgba(255,251,246,.82); }
+.dusk-crumbs a{ color:rgba(255,251,246,.82); text-decoration:none; }
+.dusk-crumbs a:hover{ color:#fff; }
+.dusk-crumbs span{ color:var(--tang); margin:0 6px; }
+.dusk-open-txt{ position:absolute; left:0; right:0; bottom:9%; padding:0 8vw; z-index:2; }
+.dusk-kind{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.24em; font-size:.7rem; color:var(--tang); margin:0 0 12px; }
+.dusk-title{ font-family:var(--display); text-transform:lowercase; font-weight:800; line-height:1.06; color:#f6efe6;
+  font-size:clamp(2rem,5.2vw,4rem); max-width:17ch; margin:0; text-shadow:0 3px 30px rgba(0,0,0,.6); }
+.dusk-scroll{ margin:26px 0 0; font-family:var(--mono); font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,251,246,.75); animation:duskbob 1.8s ease-in-out infinite; }
+@keyframes duskbob{ 0%,100%{ transform:translateY(0); opacity:.7 } 50%{ transform:translateY(6px); opacity:1 } }
+.dusk-item{ opacity:0; transform:translateY(30px); transition:opacity 1.3s ease, transform 1.3s ease; }
+.dusk-item.visible{ opacity:1; transform:none; }
+.dusk-full{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:8vh 5vw; }
+.dusk-full>img{ max-height:86vh; max-width:94vw; width:auto; border-radius:2px; box-shadow:0 30px 80px rgba(0,0,0,.55); cursor:zoom-in; }
+.dusk-cluster{ min-height:86vh; display:flex; align-items:center; justify-content:center; gap:3vw; flex-wrap:wrap; padding:8vh 6vw; }
+.dusk-cluster>img{ max-height:54vh; max-width:31vw; width:auto; border-radius:2px; box-shadow:0 22px 60px rgba(0,0,0,.5); cursor:zoom-in; }
+.dusk-text{ min-height:86vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; padding:10vh 6vw; text-align:center; }
+.dusk-text>img{ max-height:54vh; max-width:80vw; width:auto; border-radius:2px; box-shadow:0 22px 60px rgba(0,0,0,.5); cursor:zoom-in; }
+.dusk-cap{ font-family:var(--mono); font-size:clamp(.95rem,2.2vw,1.35rem); letter-spacing:.03em; color:rgba(246,239,230,.92); max-width:24ch; margin:0; }
+.dusk-onward{ position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:14px 26px; justify-content:space-between;
+  padding:56px 8vw 90px; font-family:var(--mono); font-size:.8rem; }
+.dusk-onward a{ color:rgba(246,239,230,.85); text-decoration:none; border-bottom:2px solid transparent; }
+.dusk-onward a:hover{ color:#fff; border-color:var(--tang); }
+@media(max-width:640px){
+  .dusk-cluster{ gap:14px; }
+  .dusk-cluster>img{ max-width:84vw; max-height:44vh; }
+  .dusk-full>img{ max-height:80vh; }
+  .dusk-text>img{ max-height:46vh; }
+}
 /* zine flipbook viewer */
 #zine-viewer{ position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; gap:6px;
   background:rgba(8,6,12,.94); backdrop-filter:blur(6px); padding:20px; }
@@ -1313,6 +1349,37 @@ our anemic smiles in a tangent` }
       blurb: "Light, shadow, and small nothings worth holding on to.",
       projects: [
         {
+          id: "bcn-dusk",
+          title: "when sunset and droplets dissolve in bcn, apolos sigh",
+          lower: true,
+          featured: true,
+          thumb: "photos/bcndusk/l4-12.jpg",
+          kind: "Photo series",
+          subtitle: "barcelona, from dusk to comedown",
+          type: "dusk",
+          plainBg: true,
+          opener: "l4-12",
+          scenes: [
+            { t:"cluster", src:["l1-02","l2-05","l1-10"] },
+            { t:"full", src:"l1-07" },
+            { t:"cluster", src:["l4-03","l4-05","l1-13"] },
+            { t:"full", src:"l3-14" },
+            { t:"text", src:"l3-13", cap:"el millor estiu de la teva vida" },
+            { t:"full", src:"l3-15" },
+            { t:"cluster", src:["l2-07","l4-09"] },
+            { t:"full", src:"l2-02" },
+            { t:"text", src:"l3-09", cap:"no se me quita el sabor de tu boca" },
+            { t:"cluster", src:["l3-04","l3-07","l4-14"] },
+            { t:"full", src:"l1-16" },
+            { t:"cluster", src:["l3-06","l3-08","l2-03"] },
+            { t:"full", src:"l2-04" },
+            { t:"full", src:"l4-06" },
+            { t:"text", src:"l3-05", cap:"nunca acabo lo que empiezo" },
+            { t:"cluster", src:["l2-09","l3-12"] },
+            { t:"full", src:"l4-15" }
+          ]
+        },
+        {
           id: "cheese-vivid-dreams",
           title: "cheese creates ldn vivid dreams",
           lower: true,
@@ -1927,6 +1994,7 @@ function countLabel(p){
 function renderProject(s, p){
   let body = '';
   if(p.plainBg) document.body.classList.add('plain-bg');
+  if(p.type === 'dusk') return renderDusk(s, p);
   if(p.type === 'spotify'){
     // Newest first: sort by the hidden "date" key (e.g. "2025-03") descending.
     const items = p.embeds.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
@@ -2231,6 +2299,79 @@ function renderProject(s, p){
     </div></section>`;
   if(p.type === 'route') setupRouteFocus();
 }
+// Dusk (barcelona): a full-bleed scroll that dissolves from day into night.
+function renderDusk(s, p){
+  const base = 'photos/bcndusk/';
+  const src = r => base + r + '.jpg';
+  const idx = s.projects.indexOf(p);
+  const next = s.projects[(idx + 1) % s.projects.length];
+  const nextLink = s.projects.length > 1
+    ? `<a class="next" href="#/${s.id}/${next.id}">next in ${esc(s.label)}: ${esc(next.title)} &rarr;</a>`
+    : `<a class="next" href="#/">back to home &rarr;</a>`;
+  const scenes = (p.scenes || []).map(sc => {
+    if(sc.t === 'full')    return `<div class="dusk-full dusk-item"><img src="${src(sc.src)}" alt="" loading="lazy" onclick="zoom('${src(sc.src)}')"></div>`;
+    if(sc.t === 'text')    return `<div class="dusk-text dusk-item"><img src="${src(sc.src)}" alt="" loading="lazy" onclick="zoom('${src(sc.src)}')"><p class="dusk-cap">${esc(sc.cap || '')}</p></div>`;
+    if(sc.t === 'cluster') return `<div class="dusk-cluster dusk-item">${sc.src.map(r => `<img src="${src(r)}" alt="" loading="lazy" onclick="zoom('${src(r)}')">`).join('')}</div>`;
+    return '';
+  }).join('');
+  app.innerHTML = `
+    <section class="view active dusk-view" data-theme="${s.id}">
+      <div class="dusk-sky"></div>
+      <div class="dusk-scenes">
+        <div class="dusk-open">
+          <img src="${src(p.opener)}" alt="">
+          <div class="dusk-open-veil"></div>
+          <div class="dusk-crumbs"><a href="#/">Home</a><span>/</span><a href="#/${s.id}">${esc(s.label)}</a></div>
+          <div class="dusk-open-txt">
+            <p class="dusk-kind">${esc(p.kind || '')}</p>
+            <h1 class="dusk-title">${esc(p.title)}</h1>
+            <p class="dusk-scroll">scroll &darr;</p>
+          </div>
+        </div>
+        ${scenes}
+        <div class="dusk-onward">
+          <a href="#/${s.id}">&larr; back to ${esc(s.label)}</a>
+          ${nextLink}
+        </div>
+      </div>
+    </section>`;
+  window.scrollTo(0, 0);
+  setupDusk();
+}
+window.setupDusk = function(){
+  var sky = document.querySelector('.dusk-sky'); if(!sky) return;
+  var stops = [
+    { p:0.00, a:[58,40,58], b:[122,74,54] },   // warm dusk
+    { p:0.42, a:[44,27,66], b:[78,34,66] },     // violet
+    { p:0.72, a:[22,17,44], b:[40,22,58] },     // deep indigo
+    { p:1.00, a:[8,7,16],   b:[3,3,9] }         // near black
+  ];
+  var L = (x,y,t) => Math.round(x + (y - x) * t);
+  var C = (a,b,t) => 'rgb(' + L(a[0],b[0],t) + ',' + L(a[1],b[1],t) + ',' + L(a[2],b[2],t) + ')';
+  function paint(){
+    if(!sky.isConnected){ window.removeEventListener('scroll', window._duskScroll); if(window._duskIO) window._duskIO.disconnect(); return; }
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pr = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    var i = 0; while(i < stops.length - 1 && pr > stops[i + 1].p) i++;
+    var s0 = stops[i], s1 = stops[Math.min(i + 1, stops.length - 1)];
+    var t = s1.p > s0.p ? (pr - s0.p) / (s1.p - s0.p) : 0;
+    sky.style.background = 'linear-gradient(180deg,' + C(s0.a, s1.a, t) + ' 0%,' + C(s0.b, s1.b, t) + ' 100%)';
+  }
+  if(window._duskScroll) window.removeEventListener('scroll', window._duskScroll);
+  var ticking = false;
+  window._duskScroll = function(){ if(!ticking){ ticking = true; requestAnimationFrame(function(){ paint(); ticking = false; }); } };
+  window.addEventListener('scroll', window._duskScroll, { passive:true });
+  paint();
+  if(window._duskIO) window._duskIO.disconnect();
+  if('IntersectionObserver' in window){
+    window._duskIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); window._duskIO.unobserve(e.target); } });
+    }, { threshold: 0.14 });
+    document.querySelectorAll('.dusk-item').forEach(function(el){ window._duskIO.observe(el); });
+  } else {
+    document.querySelectorAll('.dusk-item').forEach(function(el){ el.classList.add('visible'); });
+  }
+};
 // Route (the trip): a photo comes into focus only as it passes the centre of the screen.
 window.setupRouteFocus = function(){
   if(!('IntersectionObserver' in window)) { document.querySelectorAll('.route .rphoto').forEach(function(el){ el.classList.add('infocus'); }); return; }
