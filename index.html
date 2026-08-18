@@ -1396,6 +1396,8 @@ our anemic smiles in a tangent` }
           subtitle: "barcelona, from dusk to comedown",
           type: "dusk",
           plainBg: true,
+          download: "zine-bcn-dusk.pdf",
+          preview: { dir: "photos/zinebcn", count: 30 },
           opener: "l4-12",
           scenes: [
             /* day — bright, warm, standing */
@@ -2369,6 +2371,26 @@ function renderDusk(s, p){
       return `<div class="dusk-cluster ${v} dusk-item">${sc.src.map(r => `<img src="${src(r)}" alt="" loading="lazy" onclick="zoom('${src(r)}')">`).join('')}</div>`; }
     return '';
   }).join('');
+  const zineDl = p.download ? `
+      <div class="zine-block">
+        <p class="zine-dl-kind">free zine</p>
+        <p class="zine-dl-title">the whole series as an a5 booklet — flip through it here, then keep it.</p>
+        ${p.preview ? `
+        <div class="zine-inline" data-dir="${esc(p.preview.dir)}" data-count="${p.preview.count}" data-idx="0">
+          <div class="zfi-frame">
+            <button class="zfi-nav zfi-prev" type="button" onclick="zineFlip(this,-1)" aria-label="previous page">&#8249;</button>
+            <div class="zfi-stage" onclick="zineFlipTap(this,event)">
+              <img class="zfi-img" src="${esc(p.preview.dir)}/p00.jpg" alt="fanzine page" onload="zinePreload(this)">
+            </div>
+            <button class="zfi-nav zfi-next" type="button" onclick="zineFlip(this,1)" aria-label="next page">&#8250;</button>
+          </div>
+          <span class="zfi-count">1 / ${p.preview.count}</span>
+        </div>` : ''}
+        <div class="zine-dl-actions">
+          ${p.preview ? `<button class="zine-dl-btn ghost" type="button" onclick="zineOpen('${esc(p.preview.dir)}',${p.preview.count},'${esc(p.download)}')">&#10530; fullscreen</button>` : ''}
+          <a class="zine-dl-btn" href="${esc(p.download)}" download>&#8595; download pdf</a>
+        </div>
+      </div>` : '';
   app.innerHTML = `
     <section class="view active dusk-view" data-theme="${s.id}">
       <div class="dusk-sky"></div>
@@ -2387,6 +2409,7 @@ function renderDusk(s, p){
           <p class="dusk-scroll">scroll &darr;</p>
         </div>
         ${scenes}
+        ${zineDl}
         <div class="dusk-onward">
           <a href="#/${s.id}">&larr; back to ${esc(s.label)}</a>
           ${nextLink}
