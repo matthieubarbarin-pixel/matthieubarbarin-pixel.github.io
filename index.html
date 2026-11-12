@@ -1534,6 +1534,7 @@ being turned off` }
           lower: true,
           featured: true,
           thumb: "photos/myjob/52.jpg",
+          coverPos: "50% 18%",
           kind: "Photo series",
           subtitle: "a dump · paris · barcelona · madrid · antwerp",
           lead: "before autumn a summer died",
@@ -1602,8 +1603,12 @@ being turned off` }
             { src: "photos/myjob/69.jpg" },
             { src: "photos/myjob/70.jpg" },
             { src: "photos/myjob/71.jpg" },
-            { src: "photos/myjob/72.jpg" },
-            { src: "photos/myjob/73.jpg" }
+            { src: "photos/myjob/73.jpg" },
+            { src: "photos/myjob/74.jpg" },
+            { src: "photos/myjob/75.jpg" },
+            { src: "photos/myjob/76.jpg" },
+            { src: "photos/myjob/77.jpg" },
+            { src: "photos/myjob/78.jpg" }
           ]
         },
         {
@@ -2222,7 +2227,7 @@ function renderSection(s){
     const banner = p.thumb || p.cover || (p.photos && (p.photos.find(function(x){return x.src;})||{}).src);
     const pearlCover = p.type === 'pearls'
       ? `<div class="fcover pearl-cover">${Array.from({length:p.total||12},(_,i)=>{ const on = i < (p.pieces?.length||0); const col = on && p.pieces[i] && p.pieces[i].pearl ? p.pieces[i].pearl : ''; return `<span class="mini-pearl${on ? ' on' : ''}"${col ? ` style="background:${col}"` : ''}></span>`; }).join('')}</div>`
-      : (banner ? `<div class="fcover"><img src="${esc(banner)}" alt="cover of ${esc(p.title)}" loading="lazy"></div>` : '');
+      : (banner ? `<div class="fcover"><img src="${esc(banner)}" alt="cover of ${esc(p.title)}" loading="lazy"${p.coverPos ? ` style="object-position:${esc(p.coverPos)}"` : ''}></div>` : '');
     return `
       <a class="fcard" href="#/${s.id}/${p.id}">
         ${pearlCover}
